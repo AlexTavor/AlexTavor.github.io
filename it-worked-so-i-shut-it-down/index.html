@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>It worked, so I shut it down — Alex Tavor</title>
+<meta name="description" content="I spent a week building a gated, test-first orchestrator that lets language models write code on their own. It worked, and what it proved by working is why I shut it down.">
+<link rel="canonical" href="https://alextavor.github.io/it-worked-so-i-shut-it-down/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="It worked, so I shut it down">
+<meta property="og:description" content="I built a gated, test-first orchestrator that lets language models write code on their own. It worked, and what it proved by working is why I shut it down.">
+<meta property="og:url" content="https://alextavor.github.io/it-worked-so-i-shut-it-down/">
+<meta property="og:image" content="https://alextavor.github.io/assets/chdr-loop.png">
+<meta property="og:site_name" content="Alex Tavor">
+<meta property="article:published_time" content="2026-06-12">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="It worked, so I shut it down">
+<meta name="twitter:description" content="I built a gated, test-first orchestrator that lets language models write code on their own. It worked, and what it proved by working is why I shut it down.">
+<meta name="twitter:image" content="https://alextavor.github.io/assets/chdr-loop.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<nav class="site-nav"><a href="/">← Alex Tavor</a></nav>
+<main class="wrap">
+<article>
+
+<h1>It worked, so I shut it down</h1>
+<p class="byline">Alex Tavor · June 2026</p>
+
+<p>I spent about a week building an agentic coding orchestrator, a system that drives language models through a gated, test-first loop and lets them write code on their own. It worked, and what it proved by working is why I shut it down.</p>
+
+<p>The orchestrator was one piece of a larger methodology. It automated the implementation step on a simple bet. Make writing code reliable and cheap, and the work that matters moves to either side of it: choosing what to build beforehand, and confirming it did what you meant afterward. The only way to test that was to build the orchestrator and run it on real work, so I did. The work was the project's own codebase: bootstrapping the LangGraph orchestration, writing the nodes and the tooling. State, control flow, gates, boilerplate. Close to the best case for code generation: greenfield, deterministic, self-authored, no legacy to honor. The bet holds only where the contract can be made stable; exploratory and performance-critical work calls for other approaches.</p>
+
+<p>Even for the best case, deciding what to build was always harder than building it. The spec was always the executable contract. Still, implementation often took the lion's share of time and attention. The cost and speed of AI as implementor changed that.</p>
+
+<p>Here is what one task went through.</p>
+
+<p>First, a RED phase. A model wrote failing tests, which had to clear a series of deterministic gates before any of it counted. Did they fail for the right reason rather than failing to compile? Did they pass static analysis and type checking? Did every test the spec named actually exist? Only then did a reasoning model review them against a behavioral checklist. Were they testing real behavior, or just asserting that the code returns the type it returns? If the reviewer found them weak, its objections became the next prompt and the loop went again.</p>
+
+<p>Then, a GREEN phase. The model wrote code until the tests passed and static analysis came back clean. If a task stalled, the orchestrator escalated it to a stronger, costlier model with a fresh budget.</p>
+
+<figure>
+  <img src="/assets/chdr-loop.png" alt="Flowchart of the chdr loop. A spec enters a RED phase, where a model writes failing tests that must clear deterministic gates and a reasoning-model review; then a GREEN phase, where a model writes code until the tests pass and static analysis is clean; a stalled task escalates to a stronger model.">
+  <figcaption>The chdr loop: a spec runs through RED (write failing tests, clear the gates) and GREEN (write code until they pass), escalating to a stronger model when it stalls.</figcaption>
+</figure>
+
+<p>Each step got a context built from scratch, holding only what it needed: the rules for the files it was about to touch, the files it had to read, the tools it was allowed to call, nothing else. A running record tracked every failure as open, resolved, or regressed, and shrank as things got fixed, so the model never re-read noise. The point was to spend the model's attention, and mine, on as little as possible. A plan took about a minute to read before the loop ran, a result about a minute to check after.</p>
+
+<p>When a run failed I did not patch the run. I found the one root cause, wrote it down as a general rule, and re-ran the same task on a fresh branch to prove the rule closed the gap.</p>
+
+<p>The first substantial task took ten reruns to pass, each failing a different way. One was a loop that kept retrying a failing call until it ran out of budget. Another was a pattern where each new fix quietly dropped an earlier one. I closed that one by feeding every rerun the previous review's findings as a do-not-regress list. Every failure became a rule and a commit, and run ten passed clean. The implementation, every task and every rerun, cost just over two dollars on cheap models. That is not a saving I am claiming; the real cost was the week of building and the rule-by-rule debugging. What the two dollars bought was the freedom to re-run an entire task just to prove a single rule, which is the only reason that discipline made sense. I used the frontier model only where it counted, writing the spec at the start and reviewing the result at the end.</p>
+
+<p>I had expected writing the code to be the hard part, and the first task looked that way. Every rule I added was about making the generated code compile, type-check, and not break what already worked. But the next two tasks passed on the first run, and so did nearly every task after them. The failures that remained were a different kind. Not the code being wrong, but the spec. A test no implementation could satisfy, output that changed from one run to the next, a spec loose enough that a useless implementation passed it.</p>
+
+<p>Thirteen tasks ran through the loop in all. Once it was reliably producing passing pull requests, I had a frontier model review them. It kept finding the same thing: holes in the spec. The loop worked, and cheaply, for a fraction of a frontier model's cost. But it was doing the wrong job perfectly. The work that needed doing was upstream of it, in the spec, and no amount of polishing the loop would move it there. So I stopped building the orchestrator. A finished loop would have done a narrow class of tasks cheaply, for the release or two before the mainstream tools absorbed the edge.</p>
+
+<p>The loop builds exactly to the contract it is handed, so an under-specified contract gets built faithfully, passes every gate, and ships wrong. One task asked for a classifier that sorts a test run into one of five verdicts:</p>
+
+<pre><code class="language-python">OutcomeKind = Literal[
+    "RED_VALID_FAIL", "RED_COMPILE_FAIL", "GREEN_PASS", "GREEN_FAIL", "TEST_CRASH"
+]</code></pre>
+
+<p>The contract test checked that the result was one of them:</p>
+
+<pre><code class="language-python">assert result.outcome in {
+    "RED_VALID_FAIL", "RED_COMPILE_FAIL",
+    "GREEN_PASS", "GREEN_FAIL", "TEST_CRASH",
+}</code></pre>
+
+<p>That assertion holds for any of the five, so it cannot notice when one of them is never produced. One never was. <code>GREEN_FAIL</code>, the verdict for tests failing in the GREEN phase, was unreachable: the classifier did not distinguish that case, and the membership check stayed green regardless. The dead verdict shipped to main before a human caught it. The code did exactly what the spec said. The spec was imprecise, and nothing in the loop could tell.</p>
+
+<p>It is a trivial bug, and that is the point. Plenty of developers write assertions that weak. The difference is that when the same person writes the test and the code, the intent sits in their head and tends to drag the code toward correct even when the assertion is loose. In the loop nobody holds that intent. A model writes the test to satisfy the spec, a model writes the code to satisfy the test, and the spec is the only place the intent ever lived. Miss it there and the weak spec rides straight through the gates to a review fast enough to miss it too.</p>
+
+<p>The same gap kept appearing, so catching it became a standing rule: can the spec survive a literal-minded implementer? For the classifier, the fix is to pin each verdict by value instead of membership, and to require that every label the contract names can actually be produced:</p>
+
+<pre><code class="language-python">assert outcome(failing, {"pytest": 1}, "GREEN") == "GREEN_FAIL"
+assert outcome(failing, {"pytest": 1}, "RED")   == "RED_VALID_FAIL"</code></pre>
+
+<p>Examples run out once the output ranges over a whole input domain rather than a fixed set of labels: you cannot enumerate every shape of source a complexity rule might judge. There the check is a metamorphic property, an invariance the verdict has to hold across the entire family of inputs, such as a violation buried at any nesting depth still being caught, plus a check that the cases do not contradict each other. These techniques are decades old. Property-based and metamorphic testing long predate the models; what is different here is aiming them at the spec rather than the code.</p>
+
+<p>The goal is not to make design validation correct, because no tool can. Whether a spec captures what you meant is a judgment that lives in your head, and sometimes it is not settled until you build. The goal is to make applying that judgment cheap. The orchestrator never made code correct; the classifier that shipped wrong proves it. It made code cheap, and that was enough: once writing code costs almost nothing, the spec is what is left to get wrong. It is the same bet, one level up.</p>
+
+<p>Most of what feels like validation can be automated. A tool can find the gaps in a spec, generate the implementations that pass the tests while doing the wrong thing, and put the decision in front of a person in a form they can judge fast. The contract-adequacy check is the first piece already working. What I am testing now is how much of the rest is automatable, and how much really is judgment.</p>
+
+<hr>
+
+<p>The orchestrator, chdr, is public with a fuller post-mortem: <a href="https://github.com/AlexTavor/chdr">https://github.com/AlexTavor/chdr</a>. The spec-first, gated methodology that came out of it, Proof-Driven Development, is still in development. Both are personal open-source research, not a product. There is nothing to buy.</p>
+
+</article>
+</main>
+</body>
+</html>

@@ -1,0 +1,129 @@
+:root {
+  --bg: #fdfdfc;
+  --fg: #1b1b1a;
+  --muted: #6f6f69;
+  --rule: #e6e4df;
+  --link: #2f5d50;
+  --link-hover: #1d3a31;
+  --code-bg: #f4f3ef;
+  --code-fg: #24292f;
+  --sel: #d8efe6;
+  --maxw: 40rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15161a;
+    --fg: #e7e7e3;
+    --muted: #9a9a93;
+    --rule: #2b2d33;
+    --link: #7cb8a6;
+    --link-hover: #a9d4c7;
+    --code-bg: #1d1f24;
+    --code-fg: #e7e7e3;
+    --sel: #244f43;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Charter, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  font-size: 1.16rem;
+  line-height: 1.66;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--sel); }
+
+.site-nav { max-width: var(--maxw); margin: 0 auto; padding: 1.6rem 1.25rem 0; }
+.site-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+.site-nav a:hover { color: var(--fg); }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 2.4rem 1.25rem 5rem; }
+
+h1 {
+  font-size: 2.1rem;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0.4rem 0 0.5rem;
+  text-wrap: balance;
+}
+.byline { color: var(--muted); font-size: 0.95rem; margin: 0 0 2.4rem; }
+
+p { margin: 0 0 1.3rem; }
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+a:hover { color: var(--link-hover); }
+
+figure { margin: 2.3rem 0; }
+figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  background: #fff;
+}
+figcaption {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-style: italic;
+  margin-top: 0.7rem;
+  text-align: center;
+}
+
+code { font-family: "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace; }
+p code, li code {
+  background: var(--code-bg);
+  padding: 0.12em 0.34em;
+  border-radius: 4px;
+  font-size: 0.84em;
+}
+pre {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  padding: 1rem 1.1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.7rem 0;
+  line-height: 1.5;
+  border: 1px solid var(--rule);
+}
+pre code { font-size: 0.82rem; }
+
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.7rem 0; }
+
+/* landing */
+.home h1 { font-size: 1.85rem; margin-bottom: 0.2rem; }
+.home .tagline { color: var(--muted); margin: 0 0 1.4rem; }
+.home h2 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 2.4rem 0 0.9rem;
+}
+.home ul { list-style: none; padding: 0; margin: 0; }
+.home li { margin: 0 0 1.15rem; }
+.home .title { font-size: 1.15rem; }
+.home .dek { color: var(--muted); font-size: 0.97rem; display: block; margin-top: 0.15rem; }
+
+@media (max-width: 480px) {
+  body { font-size: 1.08rem; }
+  h1 { font-size: 1.72rem; }
+  .wrap { padding-top: 1.6rem; }
+}
