@@ -127,3 +127,17 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 2.7rem 0; }
   h1 { font-size: 1.72rem; }
   .wrap { padding-top: 1.6rem; }
 }
+
+/* content-page headings (work-with-me and future essays that use h2) */
+article h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2.3rem 0 0.7rem;
+}
+article h2:first-of-type { margin-top: 1.4rem; }
+
+/* landing — intro paragraph + availability line */
+.home .intro { margin: 0 0 1.1rem; }
+.home .avail { margin: 0 0 0.4rem; }
+.home .avail a { font-weight: 700; }
