@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "name": "Blast radius of deriveRoadmap",
+    "kind": "blast-radius",
+    "symbol": "deriveRoadmap",
+    "file": "src/roadmap.ts",
+    "dependents": 8,
+    "referenceNodes": 59,
+    "opaqueImportSites": 0
+  },
+  "nodes": [
+    {
+      "id": "seam:deriveRoadmap",
+      "type": "seam",
+      "label": "deriveRoadmap",
+      "status": "core",
+      "summary": "seam in src/roadmap.ts — 8 static dependent(s), 0 opaque site(s)"
+    },
+    {
+      "id": "dep:0",
+      "type": "dependent",
+      "label": "src/commands/plan.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:1",
+      "type": "dependent",
+      "label": "src/commands/roadmap.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:2",
+      "type": "dependent",
+      "label": "src/map/spine.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:3",
+      "type": "dependent",
+      "label": "src/refactor.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:4",
+      "type": "dependent",
+      "label": "src/remediation/status.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:5",
+      "type": "dependent",
+      "label": "test/roadmap-curate.test.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:6",
+      "type": "dependent",
+      "label": "test/roadmap-signoff.test.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    },
+    {
+      "id": "dep:7",
+      "type": "dependent",
+      "label": "test/roadmap.test.ts",
+      "status": "core",
+      "summary": "depends on deriveRoadmap"
+    }
+  ],
+  "edges": [
+    {
+      "id": "aff:0",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:0",
+      "label": "affects"
+    },
+    {
+      "id": "aff:1",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:1",
+      "label": "affects"
+    },
+    {
+      "id": "aff:2",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:2",
+      "label": "affects"
+    },
+    {
+      "id": "aff:3",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:3",
+      "label": "affects"
+    },
+    {
+      "id": "aff:4",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:4",
+      "label": "affects"
+    },
+    {
+      "id": "aff:5",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:5",
+      "label": "affects"
+    },
+    {
+      "id": "aff:6",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:6",
+      "label": "affects"
+    },
+    {
+      "id": "aff:7",
+      "type": "affects",
+      "source": "seam:deriveRoadmap",
+      "target": "dep:7",
+      "label": "affects"
+    }
+  ],
+  "views": [
+    {
+      "id": "blast",
+      "title": "Blast radius — deriveRoadmap",
+      "edgeTypes": [
+        "affects"
+      ],
+      "layout": "layered-dag",
+      "nodeTypes": [
+        "seam",
+        "dependent"
+      ],
+      "overlay": true
+    }
+  ]
+}
