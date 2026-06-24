@@ -1,7 +1,23 @@
 import { graph, type GraphEdge, type GraphView } from './model';
-import { VIEW_HELP, EDGE_HELP } from './copy';
+import { buildElements, type Toggles } from './buildElements';
+import { VIEW_HELP, EDGE_HELP, VIEW_EMOJI } from './copy';
 
 const labelOf = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
+const headOf = (v: GraphView) => v.title.split('—')[0].trim();
+
+// The structural projections worth jumping between for a single rule: where it sits (taxonomy) and what
+// it builds on (dependency). A target is only offered when it's a different view AND actually renders the
+// node — dependency hides rules with no cites/generalizes edge, so the button must not lead to an empty stage.
+const CROSS_VIEW_IDS = ['taxonomy', 'dependency'];
+
+function crossViewsFor(nodeId: string, currentViewId: string | undefined, toggles: Toggles): GraphView[] {
+  return graph.views.filter(
+    (v) =>
+      CROSS_VIEW_IDS.includes(v.id) &&
+      v.id !== currentViewId &&
+      buildElements(v, toggles).nodes.some((n) => n.data.id === nodeId),
+  );
+}
 
 function group(list: GraphEdge[], dir: 'out' | 'in') {
   const m = new Map<string, string[]>();
@@ -15,7 +31,7 @@ function group(list: GraphEdge[], dir: 'out' | 'in') {
   return [...m.entries()];
 }
 
-export default function DetailPanel({ view, nodeId, onClose }: { view: GraphView | null; nodeId: string | null; onClose: () => void }) {
+export default function DetailPanel({ view, nodeId, toggles, onShowIn, onClose }: { view: GraphView | null; nodeId: string | null; toggles: Toggles; onShowIn: (viewId: string, nodeId: string) => void; onClose: () => void }) {
   // 1. a node is selected -> its full detail
   const node = nodeId ? graph.nodes.find((n) => n.id === nodeId) : null;
   if (node) {
@@ -23,6 +39,7 @@ export default function DetailPanel({ view, nodeId, onClose }: { view: GraphView
       ...group(graph.edges.filter((e) => e.source === node.id), 'out'),
       ...group(graph.edges.filter((e) => e.target === node.id), 'in'),
     ];
+    const crossViews = node.type === 'rule' ? crossViewsFor(node.id, view?.id, toggles) : [];
     return (
       <aside className="panel panel-open">
         <div className="panel-mobilebar"><button className="panel-close" onClick={onClose} aria-label="Close details">×</button></div>
@@ -33,6 +50,30 @@ export default function DetailPanel({ view, nodeId, onClose }: { view: GraphView
           {node.layer && <span className="badge">{node.layer}</span>}
           {node.tags?.map((t) => <span className="badge" key={t}>{t}</span>)}
         </div>
+        {crossViews.length > 0 && (
+          <div className="crossview">
+            <span className="crossview-label">trace this rule</span>
+            <div className="crossview-btns">
+              {crossViews.map((v) => (
+                <button key={v.id} className="crossview-btn" onClick={() => onShowIn(v.id, node.id)} title={v.title}>
+                  <span aria-hidden="true">{VIEW_EMOJI[v.id] ?? '•'}</span> {headOf(v)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {node.status === 'provisional' && node.confirmWhen && (
+          <div className="confirm-when">
+            <span className="confirm-when-label">confirm when</span>
+            <p>{node.confirmWhen}</p>
+          </div>
+        )}
+        {node.confirmedBy && (
+          <div className="confirmed-by">
+            <span className="confirmed-by-label">confirmed</span>
+            <p>{node.confirmedBy}</p>
+          </div>
+        )}
         {node.summary && <p className="summary">{node.summary}</p>}
         {node.body && <div className="body">{node.body}</div>}
         {groups.length > 0 && <div className="rel-head">relationships</div>}

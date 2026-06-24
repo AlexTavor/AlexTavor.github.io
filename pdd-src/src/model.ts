@@ -14,6 +14,10 @@ const NodeSchema = z.object({
   body: z.string().optional(),
   layer: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  // For provisional rules: the strict, observable evidence that would confirm the rule (promote it to core).
+  confirmWhen: z.string().optional(),
+  // For rules promoted from provisional: the real-run evidence that confirmed them (why this rule is core).
+  confirmedBy: z.string().optional(),
 });
 
 const EdgeSchema = z.object({
@@ -77,3 +81,25 @@ function loadGraph(): Graph {
 }
 
 export const graph = loadGraph();
+
+// A rule with no cites/generalizes edge silently vanishes from the Dependency view (overlay:true). That
+// is only acceptable when it's a deliberate axiom — so require such rules to be tagged "independent".
+// Anything neither linked nor tagged is an authoring gap: warned here and surfaced as a toast in the app.
+function findOrphanRules(g: Graph): string[] {
+  const linked = new Set<string>();
+  for (const e of g.edges) {
+    if (e.type === 'cites' || e.type === 'generalizes') { linked.add(e.source); linked.add(e.target); }
+  }
+  return g.nodes
+    .filter((n) => n.type === 'rule' && !linked.has(n.id) && !(n.tags ?? []).includes('independent'))
+    .map((n) => n.id);
+}
+
+export const orphanRules = findOrphanRules(graph);
+if (orphanRules.length) {
+  console.warn(
+    `[pdd] ${orphanRules.length} rule(s) are neither linked in the dependency graph nor tagged "independent" — ` +
+      `they will not appear in the Dependency view:`,
+    orphanRules,
+  );
+}

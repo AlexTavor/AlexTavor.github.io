@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, useRef } from 'react';
-import { graph } from './model';
+import { graph, orphanRules } from './model';
 import PddGraph, { type FocusTarget } from './PddGraph';
 import DetailPanel from './DetailPanel';
 import Home from './Home';
@@ -18,11 +18,20 @@ export default function App() {
   const [focus, setFocus] = useState<FocusTarget | null>(null);
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [orphanToast, setOrphanToast] = useState(orphanRules.length > 0);
   const nonce = useRef(0);
 
   const view = useMemo(() => (viewId ? graph.views.find((v) => v.id === viewId) ?? null : null), [viewId]);
   const onSelect = useCallback((id: string | null) => setSelected(id), []);
   const flip = (k: keyof Toggles) => setToggles((t) => ({ ...t, [k]: !t[k] }));
+
+  // Jump to another view with the same node still selected and centered. Used by the detail panel's
+  // cross-view buttons, so a rule you're reading in one projection can be traced into another.
+  const showInView = useCallback((targetViewId: string, nodeId: string) => {
+    setViewId(targetViewId);
+    setSelected(nodeId);
+    setFocus({ id: nodeId, nonce: ++nonce.current });
+  }, []);
 
   // Select a tab, or toggle it off (back to home). Clear the node selection either way so the right bar
   // shows the new view's explanation, not a stale node from the previous view.
@@ -86,12 +95,18 @@ export default function App() {
       {view ? (
         <main className="stage">
           <PddGraph view={view} toggles={toggles} onSelect={onSelect} focus={focus} />
-          <DetailPanel view={view} nodeId={selected} onClose={() => setSelected(null)} />
+          <DetailPanel view={view} nodeId={selected} toggles={toggles} onShowIn={showInView} onClose={() => setSelected(null)} />
         </main>
       ) : (
         <Home />
       )}
       <Legend />
+      {orphanToast && (
+        <div className="toast" role="status">
+          <span>⚠ {orphanRules.length} rule{orphanRules.length > 1 ? 's' : ''} missing from the dependency graph (no cites/generalizes link, not tagged independent).</span>
+          <button className="toast-close" onClick={() => setOrphanToast(false)} aria-label="Dismiss">×</button>
+        </div>
+      )}
       <button className="menu-trigger" onClick={() => setMenuOpen(true)}>Guide &amp; options</button>
       {menuOpen && (
         <Menu

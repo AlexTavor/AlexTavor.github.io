@@ -59,6 +59,7 @@ function rebuild(cy: Core, view: GraphView, toggles: Toggles) {
 export default function PddGraph({ view, toggles, onSelect, focus }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
+  const layingOutRef = useRef(false); // true while a view's layout is mid-flight, so focus waits for final positions
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
@@ -114,6 +115,8 @@ export default function PddGraph({ view, toggles, onSelect, focus }: Props) {
   useEffect(() => {
     const cy = cyRef.current;
     if (!cy) return;
+    layingOutRef.current = true;
+    cy.one('layoutstop', () => { layingOutRef.current = false; });
     try {
       if (view.layout === 'compound-nested') morphTo(cy, view, toggles);
       else rebuild(cy, view, toggles);
@@ -123,16 +126,24 @@ export default function PddGraph({ view, toggles, onSelect, focus }: Props) {
     }
   }, [view, toggles]);
 
-  // search / focus: center + zoom on a node, highlight it
+  // search / focus: center + zoom on a node, highlight it. When the focus arrives together with a view
+  // switch (the cross-view buttons), the new layout is still running, so defer the fit until it settles —
+  // otherwise we'd center on the node's pre-layout position. Same-view search runs immediately.
   useEffect(() => {
     const cy = cyRef.current;
     if (!cy || !focus) return;
-    const ele = cy.getElementById(focus.id);
-    if (ele.nonempty()) {
+    const apply = () => {
+      const ele = cy.getElementById(focus.id);
+      if (ele.empty()) return;
       cy.animate({ fit: { eles: ele.closedNeighborhood(), padding: 90 } }, { duration: 200 });
       cy.elements().removeClass('searchhit');
       ele.addClass('searchhit');
+    };
+    if (layingOutRef.current) {
+      cy.one('layoutstop', apply);
+      return () => { cy.removeListener('layoutstop', apply); };
     }
+    apply();
   }, [focus]);
 
   return <div ref={containerRef} className="cy-canvas" />;

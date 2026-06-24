@@ -39,7 +39,7 @@
     { "id": "family.behavior-lock-rules", "type": "family", "status": "core",        "label": "Lock and prove behavior",  "summary": "Characterize, reproduce, prove-no-drift." },
     { "id": "family.verb-skills",         "type": "family", "status": "core",        "label": "Working procedures", "summary": "How to run the work: sizing, de-risking, root-causing, reporting." },
 
-    { "id": "rule.c1", "type": "rule", "status": "core", "label": "Tools authoritative", "summary": "Run the checker; never estimate compliance by reading code." },
+    { "id": "rule.c1", "type": "rule", "status": "core", "label": "Tools authoritative", "summary": "Run the checker; never estimate compliance by reading code.", "tags": ["independent"] },
     { "id": "rule.c2", "type": "rule", "status": "core", "label": "Deadlock protocol", "summary": "If fixing A re-breaks B, suppress the tool heuristic (not a human constraint), logged." },
 
     { "id": "rule.a1", "type": "rule", "status": "core", "label": "Boundary", "summary": "For every x op limit, test x == limit." },
@@ -50,7 +50,7 @@
     { "id": "rule.a6", "type": "rule", "status": "core", "label": "Contract adequacy", "summary": "Verdict-over-structured-input needs a property + satisfiability + oracle, not examples.", "tags": ["moat"] },
     { "id": "rule.a7", "type": "rule", "status": "core", "label": "Negatives & edges", "summary": "Golden + each declared failure mode + each documented edge; no golden-only." },
     { "id": "rule.a8", "type": "rule", "status": "core", "label": "Mocking discipline", "summary": "Mock only external boundaries; minimal per-case stubs." },
-    { "id": "rule.a9", "type": "rule", "status": "provisional", "label": "Requirement traceability", "summary": "Every stated requirement maps to at least one test via a mechanically checkable id; an untraced requirement is unverified.", "tags": ["design-validation"] },
+    { "id": "rule.a9", "type": "rule", "status": "provisional", "label": "Requirement traceability", "summary": "Every stated requirement maps to at least one test via a mechanically checkable id; an untraced requirement is unverified.", "tags": ["design-validation"], "confirmWhen": "A real requirement-to-test id map runs as a gate and catches a genuinely untraced requirement on a real project: a real miss surfaces and is closed, not a seeded one." },
 
     { "id": "rule.n1", "type": "rule", "status": "core", "label": "Handle or propagate", "summary": "No silent third outcome; an observable trace or it flows to a boundary." },
     { "id": "rule.n2", "type": "rule", "status": "core", "label": "No blanket catches", "summary": "Name the exception; broad catch only at a boundary that surfaces it." },
@@ -66,7 +66,7 @@
     { "id": "rule.g2", "type": "rule", "status": "core", "label": "Triage survivors", "summary": "A surviving mutant is a weak test (fix it) or dead code (delete it) — read it before blaming the count." },
 
     { "id": "rule.gd1", "type": "rule", "status": "core", "label": "Provenance", "summary": "Properties cite a design source; never authored from the impl (it just restates the code)." },
-    { "id": "rule.gd2", "type": "rule", "status": "provisional", "label": "Adversarial refutation", "summary": "A 2nd agent writes a wrong impl that still passes — a survivor reveals a missing property." },
+    { "id": "rule.gd2", "type": "rule", "status": "provisional", "label": "Adversarial refutation", "summary": "A 2nd agent writes a wrong impl that still passes — a survivor reveals a missing property.", "confirmWhen": "On real code, an independent wrong implementation passes the existing suite, and the survivor drives a new property that kills it: a gap mutation grading had missed." },
     { "id": "rule.gd3", "type": "rule", "status": "core", "label": "Halt-and-triage", "summary": "A counterexample halts; classify bug/wrong-property/spec-gap; never auto-relax." },
 
     { "id": "rule.b1", "type": "rule", "status": "core", "label": "Characterize before change", "summary": "Lock current behavior first; the recovered tests are the spec." },
@@ -82,13 +82,13 @@
     { "id": "rule.v3", "type": "rule", "status": "core", "label": "De-risk gate", "summary": "Walking-skeleton the riskiest assumption before committing the plan." },
     { "id": "rule.v4", "type": "rule", "status": "core", "label": "PR-sizing", "summary": "Size to the operator's milestone; two no-engagement lgtm's = wrong unit." },
     { "id": "rule.v5", "type": "rule", "status": "core", "label": "Root-cause over symptom", "summary": "≥3 divergent symptoms ⇒ audit upstream, name one cause, land a catcher." },
-    { "id": "rule.v6", "type": "rule", "status": "core", "label": "Cheap checks gate expensive", "summary": "Run the full $0 deterministic suite before any costly/irreversible step." },
-    { "id": "rule.v7", "type": "rule", "status": "core", "label": "Report decisions", "summary": "Surface judgment calls, tradeoffs, suppressions — not a recap of actions." },
-    { "id": "rule.v8", "type": "rule", "status": "provisional", "label": "Decision gate", "summary": "Gate a critical decision on a falsifiable disproof condition, a detector, and proof proportionate to how much could break and how hard it is to undo." },
-    { "id": "rule.v9", "type": "rule", "status": "provisional", "label": "Design-assumptions register", "summary": "Surface the critical assumptions a design rests on; each gets a 'breaks if' falsifier, a consequence-anchored fragility, and a detector; high-fragility ones route to the de-risk/decision gate.", "tags": ["design-validation"] },
-    { "id": "rule.v10", "type": "rule", "status": "provisional", "label": "One meaning per term", "summary": "A critical spec term carries one meaning; a term with two clear meanings (ambiguity, not vagueness) splits readers silently — pin it or split it.", "tags": ["design-validation"] },
-    { "id": "rule.v11", "type": "rule", "status": "provisional", "label": "Cover the mirror", "summary": "Every operation with a natural inverse implies its inverse; a present half whose mirror is silently missing (create without delete, issue without revoke) is a gap.", "tags": ["design-validation"] },
-    { "id": "rule.v12", "type": "rule", "status": "provisional", "label": "Design completeness", "summary": "Before code, each behaviour names its contract, its failure modes, and its edges; a present-but-empty (TBD) section counts as missing.", "tags": ["design-validation"] },
+    { "id": "rule.v6", "type": "rule", "status": "core", "label": "Cheap checks gate expensive", "summary": "Run the full $0 deterministic suite before any costly/irreversible step.", "tags": ["independent"] },
+    { "id": "rule.v7", "type": "rule", "status": "core", "label": "Report decisions", "summary": "Surface judgment calls, tradeoffs, suppressions — not a recap of actions.", "tags": ["independent"] },
+    { "id": "rule.v8", "type": "rule", "status": "provisional", "label": "Decision gate", "summary": "Gate a critical decision on a falsifiable disproof condition, a detector, and proof proportionate to how much could break and how hard it is to undo.", "confirmWhen": "A real costly or hard-to-reverse decision passes through the gate with a watched detector that actually runs: it fires, or is shown it would have on the disproof condition." },
+    { "id": "rule.v9", "type": "rule", "status": "provisional", "label": "Design-assumptions register", "summary": "Surface the critical assumptions a design rests on; each gets a 'breaks if' falsifier, a consequence-anchored fragility, and a detector; high-fragility ones route to the de-risk/decision gate.", "tags": ["design-validation"], "confirmWhen": "On a real design, a registered high-fragility assumption's 'breaks if' later triggers and the register had flagged it in advance." },
+    { "id": "rule.v10", "type": "rule", "status": "provisional", "label": "One meaning per term", "summary": "A critical spec term carries one meaning; a term with two clear meanings (ambiguity, not vagueness) splits readers silently — pin it or split it.", "tags": ["design-validation"], "confirmWhen": "A real ambiguous term is shown to cause divergent reads or implementations, and pinning or splitting it resolves a concrete defect or near-miss." },
+    { "id": "rule.v11", "type": "rule", "status": "core", "label": "Cover the mirror", "summary": "Every operation with a natural inverse implies its inverse; a present half whose mirror is silently missing (create without delete, issue without revoke) is a gap.", "tags": ["design-validation"], "confirmedBy": "Cover-the-mirror Spike 1, 2026-06-09: caught a real missing inverse in cline @ 9d59de4a (a discarded onDidChangeTelemetryEnabled Disposable, a listener leak), independently verified, with a clean negative control." },
+    { "id": "rule.v12", "type": "rule", "status": "provisional", "label": "Design completeness", "summary": "Before code, each behaviour names its contract, its failure modes, and its edges; a present-but-empty (TBD) section counts as missing.", "tags": ["design-validation"], "confirmWhen": "The gate blocks code on an empty or TBD section, and filling it surfaces a contract, edge, or failure mode that would otherwise have shipped as a defect." },
 
     { "id": "deliv.truth-atlas",           "type": "deliverable", "status": "core", "label": "System Truth Atlas", "summary": "Code map + footgun register + risk register + silent-failure census." },
     { "id": "deliv.silent-failure-census", "type": "deliverable", "status": "core", "label": "Silent-failure census", "summary": "Every place the system can fail without telling you." },
@@ -114,17 +114,17 @@
 
     { "id": "family.refactor", "type": "family", "status": "provisional", "label": "Phase-2 refactor (obsolete-and-replace)", "summary": "When a mechanism is the defect, obsolete and replace it under the same proof discipline: disposition, a computed blast radius, a decision-total keep/drop contract, and pin-as-precondition.", "tags": ["phase-2"] },
 
-    { "id": "rule.rf1",  "type": "rule", "status": "provisional", "label": "Disposition at the gate", "summary": "The operator assigns each unit a disposition: repair, retire, accept, or consumed-by-a-refactor. Replace is a pointer to a shared refactor object, not a unit field." },
-    { "id": "rule.rf2",  "type": "rule", "status": "provisional", "label": "Refactor is first-class", "summary": "A refactor consumes a set of units and produces one mechanism; cardinality unifies consolidation (N), plain replace (1), and greenfield (0)." },
-    { "id": "rule.rf3",  "type": "rule", "status": "provisional", "label": "Consumes / produces / affects", "summary": "Three edges: the consumed units (retired at cutover), the produced mechanism, and the affected units whose behavior is preserved but whose code must change (the blast radius)." },
-    { "id": "rule.rf4",  "type": "rule", "status": "provisional", "label": "Decision-total contract", "summary": "Keep/drop over consumed behavior plus a preserve-set over affected behavior; every behavior assigned and every call site migrated or shimmed, or apply is blocked. No silent default." },
-    { "id": "rule.rf5",  "type": "rule", "status": "provisional", "label": "Blast radius drives cutover", "summary": "Blast radius is computed from the dependency graph (a lower bound, since runtime resolution hides edges) and chooses atomic vs parallel-change cutover." },
-    { "id": "rule.rf6",  "type": "rule", "status": "provisional", "label": "Pin is a precondition", "summary": "Pinning precedes a refactor and is demand-driven by its footprint; affected units the blast radius reaches become pin debt that gates apply." },
-    { "id": "rule.rf7",  "type": "rule", "status": "provisional", "label": "Surface-scoped pin", "summary": "Pin state is per-interface, sound only where the surface is a true cut, else widen. The same typed interface is the structural seam, the DI resolution seam, and the pin scope." },
-    { "id": "rule.rf8",  "type": "rule", "status": "provisional", "label": "Flag runtime resolution, not DI", "summary": "Interface-based dependency injection keeps the blast radius static; service locators, reflection, string registries, and dynamic import are what hide edges." },
-    { "id": "rule.rf9",  "type": "rule", "status": "provisional", "label": "Extract the seam first", "summary": "Where no boundary exists, a coarse baseline then a behavior-preserving extraction (verified a true cut) precedes the replace; the external seam is the minimum." },
-    { "id": "rule.rf10", "type": "rule", "status": "provisional", "label": "One typed graph; views are projections", "summary": "Blast radius and the precondition DAG are filtered projections over one typed graph; the roadmap list stays primary, the graph is the authoring lens." },
-    { "id": "rule.rf11", "type": "rule", "status": "provisional", "label": "Seam placement is a decision-gate", "summary": "Placement runs on a provisional seam with a walking-skeleton proof; the kill-condition is the downstream contract failing to factor through the seam." },
+    { "id": "rule.rf1",  "type": "rule", "status": "provisional", "label": "Disposition at the gate", "summary": "The operator assigns each unit a disposition: repair, retire, accept, or consumed-by-a-refactor. Replace is a pointer to a shared refactor object, not a unit field.", "confirmWhen": "A real multi-unit refactor is dispositioned at the gate and the shared-refactor-object pointer holds, with no per-unit replace field needed." },
+    { "id": "rule.rf2",  "type": "rule", "status": "provisional", "label": "Refactor is first-class", "summary": "A refactor consumes a set of units and produces one mechanism; cardinality unifies consolidation (N), plain replace (1), and greenfield (0).", "confirmWhen": "All three cardinalities (N to 1 consolidation, 1 to 1 replace, 0 to 1 greenfield) are modeled by the one refactor object on real work, with no special-casing." },
+    { "id": "rule.rf3",  "type": "rule", "status": "provisional", "label": "Consumes / produces / affects", "summary": "Three edges: the consumed units (retired at cutover), the produced mechanism, and the affected units whose behavior is preserved but whose code must change (the blast radius).", "confirmWhen": "On a real refactor, the predicted affected set matches what actually had to change: no real change falls outside the computed blast radius." },
+    { "id": "rule.rf4",  "type": "rule", "status": "provisional", "label": "Decision-total contract", "summary": "Keep/drop over consumed behavior plus a preserve-set over affected behavior; every behavior assigned and every call site migrated or shimmed, or apply is blocked. No silent default.", "confirmWhen": "The apply-blocked gate fires on an unassigned behavior or unmigrated call site on a real refactor, catching a silent default." },
+    { "id": "rule.rf5",  "type": "rule", "status": "provisional", "label": "Blast radius drives cutover", "summary": "Blast radius is computed from the dependency graph (a lower bound, since runtime resolution hides edges) and chooses atomic vs parallel-change cutover.", "confirmWhen": "A computed blast radius drives a real atomic-vs-parallel-change cutover choice that holds, and the lower-bound caveat is shown to matter when a hidden edge appears." },
+    { "id": "rule.rf6",  "type": "rule", "status": "provisional", "label": "Pin is a precondition", "summary": "Pinning precedes a refactor and is demand-driven by its footprint; affected units the blast radius reaches become pin debt that gates apply.", "confirmWhen": "Demand-driven pin debt gates a real refactor, and a pin catches a real behavior drift during it." },
+    { "id": "rule.rf7",  "type": "rule", "status": "provisional", "label": "Surface-scoped pin", "summary": "Pin state is per-interface, sound only where the surface is a true cut, else widen. The same typed interface is the structural seam, the DI resolution seam, and the pin scope.", "confirmWhen": "A per-interface pin is shown sound at a true cut, and a not-a-true-cut case is detected so the scope is widened." },
+    { "id": "rule.rf8",  "type": "rule", "status": "provisional", "label": "Flag runtime resolution, not DI", "summary": "Interface-based dependency injection keeps the blast radius static; service locators, reflection, string registries, and dynamic import are what hide edges.", "confirmWhen": "The flag catches a real runtime-resolution site that hid an edge, so the blast radius was wrong until it was found, distinct from clean interface DI." },
+    { "id": "rule.rf9",  "type": "rule", "status": "provisional", "label": "Extract the seam first", "summary": "Where no boundary exists, a coarse baseline then a behavior-preserving extraction (verified a true cut) precedes the replace; the external seam is the minimum.", "confirmWhen": "On real code with no boundary, a coarse baseline then a behavior-preserving extraction is verified a true cut and enables the replace." },
+    { "id": "rule.rf10", "type": "rule", "status": "provisional", "label": "One typed graph; views are projections", "summary": "Blast radius and the precondition DAG are filtered projections over one typed graph; the roadmap list stays primary, the graph is the authoring lens.", "confirmWhen": "A real refactor graph drives both the blast-radius view and the precondition DAG as consistent projections, with no divergence between them." },
+    { "id": "rule.rf11", "type": "rule", "status": "provisional", "label": "Seam placement is a decision-gate", "summary": "Placement runs on a provisional seam with a walking-skeleton proof; the kill-condition is the downstream contract failing to factor through the seam.", "confirmWhen": "A provisional seam is placed and a walking-skeleton proof shows the downstream contract factors through it, or the kill-condition fires and the seam is moved." },
 
     { "id": "deliv.refactor-draft",     "type": "deliverable", "status": "provisional", "label": "Refactor draft", "summary": "A non-destructive, replayable ledger overlay: the consumed set, the produced mechanism, the contract, and a gated status." },
     { "id": "deliv.keep-drop-contract", "type": "deliverable", "status": "provisional", "label": "Keep/drop contract", "summary": "The decision-total partition of consumed behavior plus the preserve-set over affected behavior." },
@@ -268,6 +268,19 @@
 
     { "id": "gn.v8-v3", "type": "generalizes", "source": "rule.v8", "target": "rule.v3", "label": "de-risk is the high-stakes cell" },
 
+    { "id": "ci.n2-n1",  "type": "cites", "source": "rule.n2",  "target": "rule.n1",  "note": "a blanket catch is a propagate that surfaces nothing" },
+    { "id": "ci.n3-n1",  "type": "cites", "source": "rule.n3",  "target": "rule.n1",  "note": "swallowed = handled with no observable trace" },
+    { "id": "ci.n4-n1",  "type": "cites", "source": "rule.n4",  "target": "rule.n1",  "note": "an orphan task's failure is neither handled nor propagated" },
+    { "id": "ci.n5-n1",  "type": "cites", "source": "rule.n5",  "target": "rule.n1",  "note": "a discarded exit code is a silent failure one layer out" },
+    { "id": "ci.g2-g1",  "type": "cites", "source": "rule.g2",  "target": "rule.g1",  "note": "triage acts on the survivors the mutation run produces" },
+    { "id": "ci.p2-p1",  "type": "cites", "source": "rule.p2",  "target": "rule.p1",  "note": "the two property sources feed properties-over-examples" },
+    { "id": "ci.p2-g1",  "type": "cites", "source": "rule.p2",  "target": "rule.g1",  "note": "mutation grades both property sources" },
+    { "id": "ci.p2-n1",  "type": "cites", "source": "rule.p2",  "target": "rule.n1",  "note": "no-silent-failure is one of the derived shape properties" },
+    { "id": "ci.b3-a6",  "type": "cites", "source": "rule.b3",  "target": "rule.a6",  "note": "the adequacy gates extended to characterization tests" },
+    { "id": "ci.b3-b1",  "type": "cites", "source": "rule.b3",  "target": "rule.b1",  "note": "characterization held to the adequacy bar" },
+    { "id": "ci.a4-a6",  "type": "cites", "source": "rule.a4",  "target": "rule.a6",  "note": "value-pinning is a contract-adequacy tactic for typed outputs" },
+    { "id": "ci.v4-v2",  "type": "cites", "source": "rule.v4",  "target": "rule.v2",  "note": "PR-sizing scales attention-sizing to the operator milestone" },
+
     { "id": "mi.adq-gap",   "type": "mitigates", "source": "family.adequacy", "target": "failure.adequacy-gap" },
     { "id": "mi.p1-gap",    "type": "mitigates", "source": "rule.p1", "target": "failure.adequacy-gap" },
     { "id": "mi.g1-gap",    "type": "mitigates", "source": "rule.g1", "target": "failure.adequacy-gap" },
@@ -322,7 +335,11 @@
     { "id": "ci.rf9-v3",  "type": "cites", "source": "rule.rf9",  "target": "rule.v3" },
     { "id": "ci.rf11-v8", "type": "cites", "source": "rule.rf11", "target": "rule.v8" },
     { "id": "ci.rf4-a6",  "type": "cites", "source": "rule.rf4",  "target": "rule.a6" },
-    { "id": "ci.rf5-m3",  "type": "cites", "source": "rule.rf5",  "target": "rule.m3" }
+    { "id": "ci.rf5-m3",  "type": "cites", "source": "rule.rf5",  "target": "rule.m3" },
+    { "id": "ci.rf3-rf2", "type": "cites", "source": "rule.rf3",  "target": "rule.rf2", "note": "the three edges define the first-class refactor object" },
+    { "id": "ci.rf1-rf2", "type": "cites", "source": "rule.rf1",  "target": "rule.rf2", "note": "disposition replace points at a shared refactor object" },
+    { "id": "ci.rf8-rf3", "type": "cites", "source": "rule.rf8",  "target": "rule.rf3", "note": "runtime resolution hides the affected (blast-radius) edges" },
+    { "id": "ci.rf10-rf3","type": "cites", "source": "rule.rf10", "target": "rule.rf3", "note": "blast radius is a projection over the typed edge graph" }
   ],
 
   "views": [
