@@ -121,7 +121,18 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 2.7rem 0; }
 .home li { margin: 0 0 1.15rem; }
 .home .title { font-size: 1.15rem; }
 .home .dek { color: var(--muted); font-size: 0.97rem; display: block; margin-top: 0.15rem; }
-.home .thumb { display: block; width: 100%; max-width: 340px; height: auto; margin-top: 0.7rem; border: 1px solid var(--rule); border-radius: 6px; }
+.home .thumb-link { display: inline-block; width: 100%; max-width: 340px; margin-top: 0.7rem; }
+.home .thumb { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; }
+.home .thumb-link:hover .thumb { border-color: var(--link); }
+
+/* landing — two-column grid: PDD on the left, Code + Writing on the right */
+.wrap.home { max-width: 48rem; }
+.home-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; align-items: start; margin-top: 0.5rem; }
+.home-cols .col h2:first-child { margin-top: 0.6rem; }
+@media (max-width: 640px) {
+  .home-cols { grid-template-columns: 1fr; gap: 0; }
+  .home-cols .col:not(:first-child) h2:first-child { margin-top: 2.4rem; }
+}
 
 @media (max-width: 480px) {
   body { font-size: 1.08rem; }
