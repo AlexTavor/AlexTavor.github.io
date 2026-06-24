@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pdd · plan snapshot</title>
+    <style>
+:root {
+  --bg: #0e1116;
+  --panel: #161b22;
+  --panel-2: #1c2230;
+  --border: #2a3140;
+  --text: #d7dee8;
+  --dim: #7d8694;
+  --accent: #4c8eff;
+  --red: #f06363;
+  --amber: #e0a64b;
+  --green: #54b87a;
+  --grey: #5a6573;
+  --p0: #4c8eff;
+  --p1: #a78bfa;
+  --p2: #e0795a;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.dim { color: var(--dim); }
+
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--panel);
+}
+.brand { font-weight: 700; letter-spacing: .2px; }
+.repo { font-family: var(--mono); font-size: 12px; }
+.progress { font-size: 12px; font-variant-numeric: tabular-nums; }
+.now { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; background: var(--panel-2); border: 1px solid var(--accent); border-radius: 12px; padding: 2px 10px; }
+.now-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+.now-id { font-family: var(--mono); font-weight: 600; color: var(--accent); }
+.now-evt { color: var(--dim); }
+.seam { margin-left: auto; background: var(--panel-2); border: 1px solid var(--border); color: var(--dim); border-radius: 6px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.seam:hover { border-color: var(--accent); color: var(--text); }
+.seam-out { font-size: 11px; font-family: var(--mono); }
+.conn { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); transition: background .3s; }
+.conn.live { background: var(--green); }
+.conn.down { background: var(--red); }
+
+/* controls */
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--panel); }
+.ctl-label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--dim); }
+.chips { display: inline-flex; gap: 6px; }
+.chip { background: var(--panel-2); border: 1px solid var(--border); color: var(--dim); border-radius: 14px; padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.active { background: var(--accent); color: #08111f; border-color: var(--accent); font-weight: 600; }
+.legend { display: inline-flex; align-items: center; gap: 12px; margin-left: auto; font-size: 11px; color: var(--dim); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend .sep { color: var(--border); }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot.r-low { background: var(--green); } .dot.r-med { background: var(--amber); } .dot.r-high { background: var(--red); }
+.sw { width: 12px; height: 10px; border-radius: 2px; display: inline-block; border: 1px solid var(--border); }
+.sw.st-done { background: var(--green); } .sw.st-inprog { background: var(--accent); } .sw.st-todo { background: transparent; }
+
+/* plan health (cycles / dangling deps) */
+.health { margin: 0; padding: 8px 18px; background: rgba(240,99,99,.10); border-bottom: 1px solid var(--red); color: #ffb4b4; font-size: 12px; font-family: var(--mono); }
+
+/* layout */
+.layout { display: grid; grid-template-columns: minmax(420px, 1.7fr) minmax(300px, 1fr); gap: 1px; background: var(--border); height: calc(100vh - 99px); }
+.gantt-pane, .detail-pane { background: var(--bg); overflow: auto; padding: 12px 16px; }
+.pane-title { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--dim); margin: 2px 0 12px; font-weight: 600; }
+
+/* axis */
+.axis { display: grid; grid-template-columns: 210px 1fr; font-size: 11px; color: var(--dim); margin-bottom: 6px; }
+
+/* gantt */
+.gantt { --colw: 8%; }
+.sech { font-size: 13px; font-weight: 600; margin: 16px 0 6px; display: flex; gap: 8px; align-items: center; }
+.sech:first-child { margin-top: 0; }
+.sech .pc { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.sech .cnt { font-size: 12px; color: var(--dim); font-weight: 400; }
+.row { display: grid; grid-template-columns: 210px 1fr; align-items: center; height: 30px; border-radius: 6px; cursor: pointer; }
+.row:hover { background: var(--panel); }
+.row.sel { background: var(--panel-2); outline: 1px solid var(--accent); }
+.row.dep .bar { box-shadow: 0 0 0 2px var(--accent); }
+.row.enb .bar { box-shadow: 0 0 0 2px var(--grey); }
+.lab { display: flex; align-items: center; gap: 6px; overflow: hidden; padding: 0 10px 0 2px; }
+.lab .dot { flex: none; }
+.rid { font-family: var(--mono); font-weight: 600; font-size: 12px; flex: none; width: 30px; }
+.ttl { font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track { position: relative; height: 100%; background: repeating-linear-gradient(90deg, var(--border) 0 1px, transparent 1px, transparent var(--colw)); }
+.bar {
+  position: absolute; top: 50%; transform: translateY(-50%); height: 16px; min-width: 16px;
+  border: 1px solid var(--grey); background: transparent; border-radius: 8px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px; padding: 0 6px;
+  border-left-width: 4px;
+}
+.bar.st-done { background: rgba(84,184,122,.22); border-color: var(--green); }
+.bar.st-inprog { background: rgba(76,142,255,.22); border-color: var(--accent); }
+.bar.st-blocked { background: rgba(240,99,99,.20); border-color: var(--red); }
+.bar.cp { border-color: var(--accent); }
+.bar.active { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+.star { font-size: 9px; color: var(--accent); margin-right: auto; }
+.szl { font-size: 9px; color: var(--dim); }
+
+/* detail pane */
+.detail { display: flex; flex-direction: column; gap: 8px; }
+.empty { color: var(--dim); }
+.d-head { display: flex; align-items: baseline; gap: 8px; }
+.d-head .rid { width: auto; }
+.d-title { font-size: 15px; font-weight: 600; }
+.bdgs { display: flex; gap: 6px; flex-wrap: wrap; }
+.bdg { font-size: 11px; border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; color: var(--dim); }
+.kv { display: grid; grid-template-columns: 96px 1fr; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; }
+.kl { font-size: 12px; color: var(--dim); }
+.goid { font-family: var(--mono); background: var(--panel); border: 1px solid var(--border); color: var(--accent); border-radius: 6px; padding: 1px 7px; font-size: 12px; cursor: pointer; margin: 0 4px 4px 0; }
+.goid:hover { border-color: var(--accent); }
+
+/* overview (default detail) */
+.ov-sec { margin-top: 6px; }
+.ov-phase { border-left: 3px solid var(--border); padding: 4px 0 4px 10px; margin: 8px 0; }
+.ov-phase.p-P0 { border-color: var(--p0); } .ov-phase.p-P1 { border-color: var(--p1); } .ov-phase.p-P2 { border-color: var(--p2); }
+.ov-phase .pn { font-weight: 600; font-size: 13px; }
+.ov-phase .pg, .ov-phase .px { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.ov-dec { font-size: 12px; padding: 5px 0; border-top: 1px solid var(--border); }
+.ov-dec .dq { color: var(--dim); }
+.sec-head { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--dim); margin: 12px 0 4px; }
+
+
+/* snapshot-only cosmetics */
+.snap { margin-left: auto; font-size: 11px; color: var(--dim); border: 1px solid var(--border); border-radius: 10px; padding: 1px 8px; }
+.conn { display: none; }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">pdd <span class="dim">· plan</span></div>
+      <div id="repo" class="repo dim"></div>
+      <div id="now" class="now" hidden></div>
+      <div id="progress" class="progress dim"></div>
+      <span class="snap" title="A frozen but fully interactive capture of the live `pdd plan` view (normally polls .pdd/plan.json). Click any bar to highlight its dependencies, filter by phase, toggle the critical path.">snapshot</span>
+      <div id="conn" class="conn" title="polling .pdd/plan.json"></div>
+    </header>
+
+    <div class="controls">
+      <span class="ctl-label">phase</span>
+      <div id="phase-chips" class="chips"></div>
+      <button id="cp-toggle" class="chip">★ critical path</button>
+      <span class="legend" id="legend">
+        <span><i class="dot r-low"></i>low</span>
+        <span><i class="dot r-med"></i>med</span>
+        <span><i class="dot r-high"></i>high</span>
+        <span class="sep">·</span>
+        <span><i class="sw st-done"></i>done</span>
+        <span><i class="sw st-inprog"></i>in&nbsp;progress</span>
+        <span><i class="sw st-todo"></i>not&nbsp;started</span>
+      </span>
+    </div>
+
+    <div id="health" class="health" hidden></div>
+
+    <main class="layout">
+      <section class="gantt-pane">
+        <div class="axis"><div class="axis-lab"></div><div class="axis-track dim">← roots · build order → · leaves</div></div>
+        <div id="gantt" class="gantt"></div>
+      </section>
+      <section class="detail-pane">
+        <h2 class="pane-title" id="detail-title">overview</h2>
+        <div id="detail" class="detail"></div>
+      </section>
+    </main>
+
+    <script>window.__PLAN__ = {"version":1,"title":"PDD self-application MVP","generatedAt":"2026-06-11T23:24:19.497Z","phases":[{"id":"P0","name":"Phase 0 — Plan dashboard + shared infra + control seam","goal":"Stand up the self-hosted MVP build-plan gantt dashboard, lock the net-new data-model schemas (units.json, plan.json, classifications overlay), and prove the one load-bearing architectural seam every later write depends on: dashboard POST -> spawn `pdd` subcommand -> CLI is sole .pdd writer. Provide a shared exported atomic writer so net-new slices don't re-implement tmp+rename.","exit_criteria":"`pdd plan` serves a 10-item .pdd/plan.json as an SVG gantt+dependency graph at a distinct port, polling live; a documented control endpoint POSTs and shells a no-op `pdd` write-command that atomically writes a .pdd slice (viewer never writes .pdd); units.json + classifications.json + plan.json schemas are written down and round-trip through readers that return safe defaults on miss."},{"id":"P1","name":"Phase 1 — map -> classified problem list -> roadmap -> HITL approve","goal":"`pdd map` orchestrates (in cost order) the mechanical sweep, the agentic atlas authoring step, the agentic survivor/candidate classification step, a deterministic carve into units.json, and opens the HITL gate. Atlas items and the merged problem list render on the findings dashboard via the RENDERERS seam; the roadmap renders on the plan dashboard; the human approves/denies/edits via the Phase-0 control seam.","exit_criteria":"units.json exists; every high/medium finding is classified (none left 'pending'); the merged, fingerprint-deduped problem list and the roadmap are visible on the dashboards; a recorded HITL approve/deny/edit decision yields a derived GREEN 'ready to remediate' verdict."},{"id":"P2","name":"Phase 2 — remediate units cycles-until-green","goal":"`pdd remediate` pulls the next approved unit whose deps are green, preps a remediation plan (HITL-gated), then runs verify->agentic-fix->re-verify cycles in a long-lived per-unit worktree until a precise green bar, lands the diff, and advances. Per-unit cycle state streams to a sibling remediation status file rendered live on the dashboard.","exit_criteria":"On a seeded roadmap, `pdd remediate` drives at least one unit from approved to green using a scripted no-op fix provider end-to-end (deterministic), then the real agentic provider takes a unit to green; the per-unit cycle/phase/blocker state is live on the dashboard and the green unit's worktree diff lands on main without touching the working tree mid-run."}],"tracks":["INFRA","DASHBOARD","HITL","MAP","ROADMAP","REMEDIATE"],"decisions":[{"decision":"Where the HITL approval write lives — viewer-side control endpoint vs terminal-side CLI prompt","choice":"(b), implemented as POST -> spawn pdd subcommand -> CLI writes. The MVP explicitly wants approve/deny/edit IN the dashboard, and the single-writer invariant survives because the viewer never touches .pdd. All five reports converge here; W7 derisks it first."},{"decision":"Remediation roadmap artifact vs MVP build-plan artifact — one file or two","choice":"(b) two files. They have different owners, lifecycles, and audiences (units churn during remediation; plan is the stable spec of THIS build). The reports conflated them; separating keeps one writer per slice and lets the plan dashboard ship in Phase 0 before units.json exists."},{"decision":"How much of the map/atlas + carve is agentic vs deterministic","choice":"(b). Only reading-to-classify (atlas) and verdicting pending survivors are irreducible judgment; everything else is rule-driven, which keeps the roadmap reproducible (stable HITL diff) and the agents on bounded worklists."},{"decision":"green certification cadence — re-grade every cycle vs only on candidate-green","choice":"(b). grade is the minutes-expensive stage; gates+prove are instant/seconds. Per-unit grade is near-free on re-run thanks to the path scope + hash-cache, but certifying only on candidate-green avoids paying it every iteration."},{"decision":"gantt/dependency rendering — hand-rolled SVG vs cytoscape","choice":"(a) hand-rolled SVG. It matches the buildless/h()/CSS-token constraint with zero new runtime dep, reuses the existing facet/detail UI, and a build plan only needs depth columns + status bars + edges. Keep a columns-by-depth-with-badge-deps fallback if edge crossings get unreadable."},{"decision":"needs-HITL pause handling inside Phase 2 — block vs exit-and-resume","choice":"(b) exit + resume. Matches grade's async-by-design + aborted-zombie-guard discipline, lets the dashboard own approve/deny for both the plan gate and blocked units, and avoids a long-lived blocked process."},{"decision":"Status surface for remediation — extend mutation/status.json or a sibling file","choice":"(b) sibling file. Two writers on one file breaks the strict single-writer invariant grade depends on; a sibling keeps grade's M11 live-view contract byte-stable while reusing the same atomic-write + rollup + live-ring code and renderer pattern."}],"criticalPath":["W2","W7","W8","W10","W13","W14","W15","W17","W18","W19","W20","W23","W24","W25","W27"],"items":[{"id":"W1","title":"units.json schema + reader (readUnits/writeUnits, safe-default)","phase":"P0","track":"INFRA","depends_on":[],"size":"S","risk":"low","status":"done","critical":false,"agentic":false,"note":"readUnits() returns {version:1,units:[],order:[]} on a missing file; a hand-written units.json round-trips; ids match grade's slug."},{"id":"W2","title":"Export shared atomic writer (writeAtomic) from status.mjs","phase":"P0","track":"INFRA","depends_on":[],"size":"S","risk":"low","status":"done","critical":true,"agentic":false,"note":"writeAtomic is exported and imported by at least one new helper; existing callers unchanged; a poll mid-write never observes a torn file."},{"id":"W3","title":".pdd/plan.json self-hosted build-plan artifact + loader","phase":"P0","track":"DASHBOARD","depends_on":["W2"],"size":"S","risk":"low","status":"done","critical":false,"agentic":false,"note":"readPlan returns a safe empty plan on miss; deriveGraph returns per-item depth + a cycle-warning on a hand-crafted cyclic plan without throwing."},{"id":"W4","title":"`pdd plan` command + its own GET-only server","phase":"P0","track":"DASHBOARD","depends_on":["W3"],"size":"M","risk":"med","status":"done","critical":false,"agentic":false,"note":"`pdd plan` boots on 4318, returns 405 on POST, serves /api/plan JSON with no-store; two dashboards run side by side."},{"id":"W5","title":"SVG gantt + dependency-edge renderer (plan UI)","phase":"P0","track":"DASHBOARD","depends_on":["W4"],"size":"L","risk":"med","status":"done","critical":false,"agentic":false,"note":"A 10-item plan.json renders as a readable swimlane gantt with dependency arrows and status colors; clicking a bar shows its deps and note."},{"id":"W6","title":"plan-progress overlay + live poll (build->live transition)","phase":"P0","track":"DASHBOARD","depends_on":["W5"],"size":"M","risk":"med","status":"done","critical":false,"agentic":false,"note":"With a hand-written plan-progress.json present, the gantt shows the active item in-progress and the connection dot live; absent the overlay it shows the static plan."},{"id":"W7","title":"Dashboard control seam: POST -> spawn `pdd` -> CLI writes (walking skeleton)","phase":"P0","track":"HITL","depends_on":["W2"],"size":"M","risk":"high","status":"done","critical":true,"agentic":false,"note":"A button in the dashboard POSTs, the server spawns a `pdd` subcommand, and a .pdd slice changes atomically; GET-only invariant on all read routes preserved; viewer process never opens .pdd for write."},{"id":"W8","title":"classifications.json overlay schema + read-time merge","phase":"P1","track":"MAP","depends_on":["W2"],"size":"M","risk":"med","status":"done","critical":true,"agentic":false,"note":"A hand-written classifications.json flips a known survivor from 'pending' to 'real-gap' in mergeFindings output; mutation.json on disk unchanged."},{"id":"W9","title":"Fingerprint-keyed dedup/rollup over merged problem list","phase":"P1","track":"MAP","depends_on":["W8"],"size":"S","risk":"low","status":"done","critical":false,"agentic":false,"note":"A co-located triple-detected site appears once in the rolled-up list with all three sources' extra payloads attached."},{"id":"W10","title":"map.json findings slice + atlas adapter (source:\"map\")","phase":"P1","track":"MAP","depends_on":["W2"],"size":"M","risk":"low","status":"done","critical":true,"agentic":false,"note":"A sample atlas JSON adapts into map.json; mergeFindings folds map findings beside check/prove/grade with repo-relative locus + fingerprint."},{"id":"W11","title":"Map/atlas + classification RENDERERS keys (findings dashboard)","phase":"P1","track":"MAP","depends_on":["W10","W8"],"size":"S","risk":"low","status":"not-started","critical":false,"agentic":false,"note":"Atlas findings and a classified survivor render with source-specific detail panels and a classification badge on the existing dashboard."},{"id":"W12","title":"Subsystem scoping (mechanical seed + optional agent rank)","phase":"P1","track":"MAP","depends_on":["W9"],"size":"M","risk":"med","status":"not-started","critical":false,"agentic":false,"note":"scopes[] lists the load-bearing subsystems ranked, derived from finding density + churn, on this repo."},{"id":"W13","title":"Atlas authoring step (agentic, bounded sub-agent)","phase":"P1","track":"MAP","depends_on":["W12","W10"],"size":"L","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"On a scoped subsystem, the agent returns valid four-part atlas JSON that adapts into map.json and renders on the dashboard."},{"id":"W14","title":"Survivor/candidate classification step (agentic) + persistence","phase":"P1","track":"MAP","depends_on":["W13","W8"],"size":"L","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"After the step, no high/medium finding remains 'pending' in mergeFindings output; each verdict carries a rationale."},{"id":"W15","title":"Roadmap carve -> units.json (deterministic decompose-by-attention)","phase":"P1","track":"ROADMAP","depends_on":["W14","W9","W1"],"size":"L","risk":"med","status":"not-started","critical":true,"agentic":false,"note":"units.json is produced reproducibly from the classified problem list; re-running on unchanged input yields a stable carve (stable HITL diff)."},{"id":"W16","title":"Roadmap render on plan dashboard (units gantt/dep view)","phase":"P1","track":"ROADMAP","depends_on":["W15","W5"],"size":"M","risk":"low","status":"not-started","critical":false,"agentic":false,"note":"The carved roadmap renders as a dependency-ordered gantt with per-unit approval state on the plan dashboard."},{"id":"W17","title":"HITL decision ledger + `pdd roadmap` write-command","phase":"P1","track":"HITL","depends_on":["W15","W1"],"size":"L","risk":"med","status":"not-started","critical":true,"agentic":false,"note":"`pdd roadmap approve` appends a decision and flips the derived verdict to GREEN; the audit ledger is append-only and replayable."},{"id":"W18","title":"Wire dashboard approve/deny/edit to the roadmap command","phase":"P1","track":"HITL","depends_on":["W7","W17","W16"],"size":"M","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"Clicking approve/deny/edit in the dashboard records the decision via a spawned `pdd roadmap` and the roadmap view reflects the new state on the next poll."},{"id":"W19","title":"`pdd map` deterministic spine (orchestrator)","phase":"P1","track":"MAP","depends_on":["W12","W13","W14","W15","W17","W9"],"size":"L","risk":"med","status":"not-started","critical":true,"agentic":false,"note":"`pdd map` on this repo produces a classified problem list + units.json + an open HITL gate end to end, streaming to the dashboard."},{"id":"W20","title":"Roadmap reader + per-unit state helpers for Phase 2","phase":"P2","track":"REMEDIATE","depends_on":["W1","W2"],"size":"M","risk":"med","status":"not-started","critical":true,"agentic":false,"note":"readRoadmap returns the next eligible unit honoring dependsOn-green; writeUnitState atomically updates one unit's state."},{"id":"W21","title":"remediation/status.json sibling writer + dashboard surface","phase":"P2","track":"REMEDIATE","depends_on":["W2"],"size":"M","risk":"low","status":"not-started","critical":false,"agentic":false,"note":"A hand-written remediation/status.json renders per-unit cycle N/M + current phase + blockers on the dashboard; grade's status.json contract untouched."},{"id":"W22","title":"Per-unit long-lived worktree session (distinct sandbox prefix)","phase":"P2","track":"REMEDIATE","depends_on":[],"size":"M","risk":"med","status":"not-started","critical":false,"agentic":false,"note":"A unit worktree survives multiple child gate/prove/grade runs; a concurrent grade prune does not reap it; destroySandbox cleanly discards a blocked unit."},{"id":"W23","title":"green-evaluator (pure scope-filtered read over slices)","phase":"P2","track":"REMEDIATE","depends_on":["W20"],"size":"M","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"On a unit with a known surviving mutant, evaluateGreen returns green:false with that blocker; once killed, returns green:true."},{"id":"W24","title":"agentic-fix seam behind a provider interface","phase":"P2","track":"REMEDIATE","depends_on":["W22"],"size":"L","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"The noop provider drives the loop deterministically; the claude provider applies a real edit inside the worktree addressing the top blocker."},{"id":"W25","title":"cmdRemediate orchestrator + per-unit state machine (skeleton)","phase":"P2","track":"REMEDIATE","depends_on":["W20","W21","W22","W23","W24"],"size":"L","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"With the noop provider on a seeded unit, `pdd remediate` runs the full cycle loop and advances/blocks deterministically, streaming state to the dashboard."},{"id":"W26","title":"plan-prep step (characterization baseline, HITL-gated)","phase":"P2","track":"REMEDIATE","depends_on":["W22","W24","W25"],"size":"L","risk":"high","status":"not-started","critical":false,"agentic":false,"note":"For a unit, plan-prep writes plan.json with characterization tests green on the baseline; a later pinned-test regression flips the unit to needs-HITL."},{"id":"W27","title":"Land-on-green + needs-HITL resume + real-provider run","phase":"P2","track":"REMEDIATE","depends_on":["W25","W26","W7"],"size":"L","risk":"high","status":"not-started","critical":true,"agentic":false,"note":"A real unit goes approved->green->landed with the agentic provider; the user's working tree is untouched mid-run; a needs-HITL pause resumes after a dashboard approval."}],"graph":{"depth":{"W1":0,"W2":0,"W3":1,"W4":2,"W5":3,"W6":4,"W7":1,"W8":1,"W9":2,"W10":1,"W11":2,"W12":3,"W13":4,"W14":5,"W15":6,"W16":7,"W17":7,"W18":8,"W19":8,"W20":1,"W21":1,"W22":0,"W23":2,"W24":1,"W25":3,"W26":4,"W27":5},"order":["W1","W2","W22","W10","W20","W21","W24","W3","W7","W8","W11","W23","W4","W9","W12","W25","W5","W13","W26","W6","W14","W27","W15","W16","W17","W18","W19"],"warnings":[]},"progress":null,"repo":"proof-driven-development"};</script>
+    <script>
+// pdd plan — pure viewer. Polls the read-only server and renders the build plan as a gantt
+// (x = DAG build-order depth, width = effort, fill = status) + dependency highlight on
+// select. No framework, no build. Mirrors the findings dashboard's h()/poll() conventions.
+// W6: when .pdd/plan-progress.json sets an activeItemId, the poll speeds up and the active
+// bar pulses — the build plan becomes a live progress view.
+"use strict";
+
+const POLL_RUN = 750;
+const POLL_IDLE = 1500;
+const SIZE_U = { S: 1, M: 1.7, L: 2.6 };
+const PC = { P0: "#4c8eff", P1: "#a78bfa", P2: "#e0795a" };
+
+const state = { sel: null, phase: "all", cpOnly: false };
+let lastData = null;
+let byId = {};
+let enablesMap = {};
+let nextPoll = POLL_IDLE;
+
+// --- tiny safe hyperscript: children are strings (-> text nodes) or Nodes ---
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v;
+    else if (k === "onclick") e.addEventListener("click", v);
+    else if (k === "title") e.title = v;
+    else e.setAttribute(k, v === true ? "" : String(v));
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === false) continue;
+    e.appendChild(typeof kid === "string" || typeof kid === "number" ? document.createTextNode(String(kid)) : kid);
+  }
+  return e;
+}
+const $ = (id) => document.getElementById(id);
+
+async function getJson(url) {
+  const r = await fetch(url, { cache: "no-store" });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+function indexData(data) {
+  byId = {};
+  enablesMap = {};
+  for (const it of data.items || []) byId[it.id] = it;
+  for (const it of data.items || []) for (const d of it.depends_on || []) (enablesMap[d] = enablesMap[d] || []).push(it.id);
+}
+
+function statusClass(s) {
+  if (s === "done" || s === "landed") return "st-done";
+  if (s === "blocked") return "st-blocked";
+  if (s && s !== "not-started") return "st-inprog"; // in-progress, in-cycle, planning, …
+  return "";
+}
+
+// --- gantt ---
+function rowNode(it, depth, colW, active) {
+  const lp = (depth[it.id] || 0) * colW;
+  let wp = (SIZE_U[it.size] || 1) * colW;
+  if (lp + wp > 99) wp = 99 - lp;
+  const sel = state.sel;
+  const isDep = sel && byId[sel] && (byId[sel].depends_on || []).includes(it.id);
+  const isEnb = sel && (enablesMap[sel] || []).includes(it.id);
+  const barCls = ["bar", statusClass(it.status), it.critical ? "cp" : "", active === it.id ? "active" : ""].join(" ");
+  return h("div", { class: ["row", isDep ? "dep" : "", isEnb ? "enb" : "", sel === it.id ? "sel" : ""].join(" "), onclick: () => select(it.id) },
+    h("div", { class: "lab" },
+      h("i", { class: "dot r-" + (it.risk || "low") }),
+      h("span", { class: "rid" }, it.id),
+      h("span", { class: "ttl", title: it.title }, it.title),
+    ),
+    h("div", { class: "track" },
+      h("div", { class: barCls, style: `left:${lp.toFixed(2)}%;width:${wp.toFixed(2)}%;border-left-color:${PC[it.phase] || "var(--grey)"}` },
+        it.critical ? h("span", { class: "star" }, "★") : null,
+        h("span", { class: "szl" }, it.size),
+      ),
+    ),
+  );
+}
+
+function renderGantt(data) {
+  if (!data) return;
+  if (!data.items || !data.items.length) {
+    $("gantt").replaceChildren(h("p", { class: "empty" }, `No plan items here (reading ${data.repo || "?"}/.pdd/). Run pdd plan from a repo whose .pdd/ has a plan.json.`));
+    return;
+  }
+  const depth = (data.graph && data.graph.depth) || {};
+  const maxD = Math.max(0, ...Object.values(depth));
+  const colW = 100 / (maxD + 3);
+  const host = $("gantt");
+  host.style.setProperty("--colw", colW.toFixed(3) + "%");
+  const active = data.progress && data.progress.activeItemId;
+  const phases = data.phases && data.phases.length ? data.phases : [...new Set((data.items || []).map((i) => i.phase))].map((id) => ({ id, name: "" }));
+  const nodes = [];
+  for (const ph of phases) {
+    if (state.phase !== "all" && state.phase !== ph.id) continue;
+    const items = (data.items || []).filter((it) => it.phase === ph.id && (!state.cpOnly || it.critical));
+    if (!items.length) continue;
+    items.sort((a, b) => (depth[a.id] || 0) - (depth[b.id] || 0) || a.id.localeCompare(b.id));
+    const done = items.filter((x) => x.status === "done").length;
+    nodes.push(h("div", { class: "sech" },
+      h("i", { class: "pc", style: `background:${PC[ph.id] || "var(--grey)"}` }),
+      `Phase ${String(ph.id).replace(/^P/, "")} · ${ph.name || ""}`,
+      h("span", { class: "cnt" }, `${done}/${items.length}`),
+    ));
+    for (const it of items) nodes.push(rowNode(it, depth, colW, active));
+  }
+  if (!nodes.length) nodes.push(h("p", { class: "empty" }, "no items match this filter"));
+  host.replaceChildren(...nodes);
+}
+
+// --- detail pane ---
+const goid = (id) => h("span", { class: "goid", onclick: () => goto(id) }, id);
+
+function detailItem(it) {
+  const deps = it.depends_on || [];
+  const enb = enablesMap[it.id] || [];
+  return [
+    h("div", { class: "d-head" }, h("span", { class: "rid" }, it.id), h("span", { class: "d-title" }, it.title)),
+    h("div", { class: "bdgs" },
+      h("span", { class: "bdg" }, it.phase),
+      h("span", { class: "bdg" }, it.track),
+      h("span", { class: "bdg" }, "size " + it.size),
+      h("span", { class: "bdg" }, (it.risk || "") + " risk"),
+      h("span", { class: "bdg" }, it.status),
+      it.critical ? h("span", { class: "bdg" }, "★ critical path") : null,
+      it.agentic ? h("span", { class: "bdg" }, "agentic") : null,
+    ),
+    h("div", { class: "kv" }, h("div", { class: "kl" }, "deliverable"), h("div", {}, it.note || "—")),
+    h("div", { class: "kv" }, h("div", { class: "kl" }, "depends on"), h("div", {}, deps.length ? deps.map(goid) : h("span", { class: "dim" }, "none — startable now"))),
+    h("div", { class: "kv" }, h("div", { class: "kl" }, "unblocks"), h("div", {}, enb.length ? enb.map(goid) : h("span", { class: "dim" }, "none — a leaf"))),
+  ];
+}
+
+function detailOverview(data) {
+  const done = (data.items || []).filter((i) => i.status === "done").length;
+  const nodes = [
+    h("div", {}, h("div", { class: "d-title" }, data.title || "build plan"), h("div", { class: "dim", style: "font-size:12px" }, `${(data.items || []).length} items · ${done} done · click any bar`)),
+    h("div", { class: "sec-head" }, "phases"),
+    ...(data.phases || []).map((p) => h("div", { class: "ov-phase p-" + p.id },
+      h("div", { class: "pn" }, `${p.id} · ${p.name || ""}`),
+      p.goal ? h("div", { class: "pg" }, "goal: " + p.goal) : null,
+      p.exit_criteria ? h("div", { class: "px" }, "exit: " + p.exit_criteria) : null,
+    )),
+  ];
+  if ((data.decisions || []).length) {
+    nodes.push(h("div", { class: "sec-head" }, "locked decisions"));
+    for (const d of data.decisions) nodes.push(h("div", { class: "ov-dec" }, h("span", { class: "dq" }, d.decision + " → "), d.choice));
+  }
+  return nodes;
+}
+
+function renderDetail(it) {
+  $("detail-title").textContent = it ? it.id : "overview";
+  $("detail").replaceChildren(...(it ? detailItem(it) : lastData ? detailOverview(lastData) : [h("p", { class: "empty" }, "loading…")]));
+}
+
+function select(id) {
+  state.sel = state.sel === id ? null : id;
+  renderGantt(lastData);
+  renderDetail(state.sel ? byId[state.sel] : null);
+}
+function goto(id) {
+  state.sel = id;
+  renderGantt(lastData);
+  renderDetail(byId[id]);
+}
+
+// --- controls ---
+function renderPhaseChips(data) {
+  const ids = ["all", ...(data.phases || []).map((p) => p.id)];
+  $("phase-chips").replaceChildren(
+    ...ids.map((id) => h("button", { class: "chip" + (state.phase === id ? " active" : ""), onclick: () => { state.phase = id; renderGantt(lastData); renderPhaseChips(lastData); } }, id)),
+  );
+}
+$("cp-toggle").addEventListener("click", () => {
+  state.cpOnly = !state.cpOnly;
+  $("cp-toggle").classList.toggle("active", state.cpOnly);
+  renderGantt(lastData);
+});
+
+// W6/live: the "now building X" indicator, driven by the .pdd/plan-progress.json overlay.
+function renderNow(progress) {
+  const host = $("now");
+  if (!progress || !progress.activeItemId) {
+    host.hidden = true;
+    return;
+  }
+  host.hidden = false;
+  host.replaceChildren(
+    h("span", { class: "now-dot" }),
+    h("span", { class: "now-id" }, progress.activeItemId),
+    progress.lastEvent ? h("span", { class: "now-evt" }, progress.lastEvent) : null,
+  );
+}
+
+function renderHealth(warnings) {
+  const host = $("health");
+  if (!warnings || !warnings.length) { host.hidden = true; return; }
+  const cyc = warnings.filter((w) => w.type === "cycle").map((w) => w.id);
+  const dang = warnings.filter((w) => w.type === "dangling").map((w) => `${w.id}→${w.missing}`);
+  host.hidden = false;
+  host.textContent = "⚠ plan graph: " +
+    [cyc.length ? `cycle at ${[...new Set(cyc)].join(", ")}` : "", dang.length ? `dangling dep ${[...new Set(dang)].join(", ")}` : ""].filter(Boolean).join(" · ");
+}
+
+// --- snapshot render (one-shot; the live build serves this same payload from /api/plan) ---
+function render(data) {
+  lastData = data;
+  indexData(data);
+  $("repo").textContent = data.repo || "";
+  const done = (data.items || []).filter((i) => i.status === "done").length;
+  $("progress").textContent = `${done}/${(data.items || []).length} done`;
+  renderNow(data.progress);
+  renderHealth((data.graph && data.graph.warnings) || []);
+  renderPhaseChips(data);
+  renderGantt(data);
+  renderDetail(state.sel ? byId[state.sel] : null);
+}
+render(window.__PLAN__);
+
+    </script>
+  </body>
+</html>
