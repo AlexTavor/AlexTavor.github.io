@@ -126,8 +126,8 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 2.7rem 0; }
 .home .thumb-link:hover .thumb { border-color: var(--link); }
 
 /* landing — two-column grid: PDD on the left, Code + Writing on the right */
-.wrap.home { max-width: 48rem; }
-.home-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; align-items: start; margin-top: 0.5rem; }
+.wrap.home { max-width: 56rem; }
+.home-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-top: 0.5rem; }
 .home-cols .col h2:first-child { margin-top: 0.6rem; }
 @media (max-width: 640px) {
   .home-cols { grid-template-columns: 1fr; gap: 0; }
