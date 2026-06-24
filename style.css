@@ -150,6 +150,8 @@ article h2 {
 article h2:first-of-type { margin-top: 1.4rem; }
 
 /* landing — intro paragraph + availability line */
-.home .intro { margin: 0 0 1.1rem; }
+.home .intro { margin: 0 0 0.6rem; }
+.home .links { margin: 0 0 1.1rem; font-size: 0.97rem; color: var(--muted); }
+.home .links a { font-weight: 600; }
 .home .avail { margin: 0 0 0.4rem; }
 .home .avail a { font-weight: 700; }
