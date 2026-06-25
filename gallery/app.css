@@ -77,3 +77,7 @@ a.fd-locus-link:hover { color: var(--accent); text-decoration: underline; }
 .fd-evk { font-family: var(--mono); font-size: 10.5px; color: var(--dim); min-width: 92px; flex: none; }
 .fd-evv { color: var(--text); }
 .fd-empty { font-size: 12px; padding: 4px 8px; }
+
+/* private repo: source links render locked + struck-through (the link still resolves for an authed viewer) */
+.fd-locus-private .fd-locus-txt { text-decoration: line-through; }
+.fd-locus-private .fd-lock { text-decoration: none; }

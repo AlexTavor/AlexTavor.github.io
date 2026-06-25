@@ -423,7 +423,10 @@ function Finding(props) {
         "\xD7"
       ] }) : null,
       /* @__PURE__ */ u3("span", { class: "fd-title", title: pf.title || "", children: pf.title || pf.fingerprint }),
-      pf.href ? /* @__PURE__ */ u3("a", { class: "fd-locus fd-locus-link", href: pf.href, target: "_blank", rel: "noopener noreferrer", title: "open " + locus, onClick: (e3) => e3.stopPropagation(), children: locus }) : /* @__PURE__ */ u3("span", { class: "fd-locus", children: locus }),
+      pf.href ? /* @__PURE__ */ u3("a", { class: "fd-locus fd-locus-link" + (props.isPrivate ? " fd-locus-private" : ""), href: pf.href, target: "_blank", rel: "noopener noreferrer", title: (props.isPrivate ? "private repo (resolves for an authed viewer): " : "open ") + locus, onClick: (e3) => e3.stopPropagation(), children: [
+        props.isPrivate ? /* @__PURE__ */ u3("span", { class: "fd-lock", "aria-hidden": "true", children: "\u{1F512} " }) : null,
+        /* @__PURE__ */ u3("span", { class: "fd-locus-txt", children: locus })
+      ] }) : /* @__PURE__ */ u3("span", { class: "fd-locus", children: locus }),
       classBadge(pf.classification)
     ] }),
     open ? /* @__PURE__ */ u3("div", { class: "fd-body", children: [
@@ -455,7 +458,7 @@ function Unit(props) {
       ] })
     ] }),
     u4.summary ? /* @__PURE__ */ u3("div", { class: "rm-summary", children: u4.summary }) : null,
-    open ? /* @__PURE__ */ u3("div", { class: "rm-dossier", children: findings.length ? findings.map((f4) => /* @__PURE__ */ u3(Finding, { f: f4 })) : /* @__PURE__ */ u3("p", { class: "fd-empty dim", children: "no joined findings" }) }) : null
+    open ? /* @__PURE__ */ u3("div", { class: "rm-dossier", children: findings.length ? findings.map((f4) => /* @__PURE__ */ u3(Finding, { f: f4, isPrivate: props.isPrivate })) : /* @__PURE__ */ u3("p", { class: "fd-empty dim", children: "no joined findings" }) }) : null
   ] });
 }
 function RoadmapView(props) {
@@ -478,7 +481,7 @@ function RoadmapView(props) {
         " pending"
       ] })
     ] }),
-    /* @__PURE__ */ u3("div", { class: "rm-list", children: units.map((u4) => /* @__PURE__ */ u3(Unit, { u: u4 })) })
+    /* @__PURE__ */ u3("div", { class: "rm-list", children: units.map((u4) => /* @__PURE__ */ u3(Unit, { u: u4, isPrivate: props.projectPrivate })) })
   ] });
 }
 
@@ -551,7 +554,7 @@ function App() {
       /* @__PURE__ */ u3("section", { class: "gx-detail", children: !active ? /* @__PURE__ */ u3("div", { class: "gx-msg dim", children: "select a project" }) : mapErr ? /* @__PURE__ */ u3("div", { class: "gx-msg", children: [
         "failed to load the map: ",
         mapErr
-      ] }) : /* @__PURE__ */ u3(RoadmapView, { payload: roadmap, interactive: false }) })
+      ] }) : /* @__PURE__ */ u3(RoadmapView, { payload: roadmap, interactive: false, projectPrivate: listing.projects.find((p3) => p3.name === active)?.visibility === "private" }) })
     ] })
   ] });
 }
