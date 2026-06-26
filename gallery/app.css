@@ -56,6 +56,9 @@ b { font-weight: 500; color: var(--text); }
 .rm-id { font-family: var(--mono); font-size: 13px; }
 .rm-sz { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
 .rm-fc { margin-left: auto; font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+.rm-cost { font-family: var(--mono); font-size: 11.5px; color: var(--dim); }
+.rm-cost.over { color: var(--warn); }
+.rm-budget { font-family: var(--mono); font-size: 12px; color: var(--dim); }
 .rm-summary { font-size: 12.5px; color: var(--dim); padding: 0 4px 8px 24px; }
 .rm-dossier { padding: 0 0 8px 18px; }
 
@@ -81,3 +84,35 @@ a.fd-locus-link:hover { color: var(--accent); text-decoration: underline; }
 /* private repo: source links render locked + struck-through (the link still resolves for an authed viewer) */
 .fd-locus-private .fd-locus-txt { text-decoration: line-through; }
 .fd-locus-private .fd-lock { text-decoration: none; }
+
+/* --- per-project summary panel (atop the roadmap) --- */
+.su { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 14px; }
+.su-head { margin-bottom: 10px; }
+.su-title { font-size: 18px; font-weight: 500; }
+.su-sub { font-size: 13px; color: var(--text); margin-top: 2px; }
+.su-prov { font-size: 11.5px; color: var(--dim); margin-top: 3px; }
+.su-run { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 12px; }
+.su-run .su-l { color: var(--dim); font-size: 11px; }
+.su-rv { font-family: var(--mono); color: var(--text); }
+.su-run-empty .su-na { color: var(--warn); font-family: var(--mono); }
+.su-run .su-hint { color: var(--dim); font-size: 11px; margin-left: auto; }
+.su-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.su-stat { background: var(--panel); border-radius: 8px; padding: 8px 10px; }
+.su-l { font-size: 10.5px; color: var(--dim); }
+.su-v { font-size: 17px; font-weight: 500; font-family: var(--mono); margin-top: 1px; }
+.su-hint { font-size: 10.5px; color: var(--dim); margin-top: 1px; }
+.su-findings { margin-bottom: 12px; }
+.su-ftotal { font-size: 12.5px; color: var(--dim); margin-bottom: 6px; }
+.su-fnum { font-size: 17px; font-weight: 500; color: var(--text); font-family: var(--mono); }
+.su-chiprow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+.su-chiplabel { font-size: 10.5px; color: var(--dim); min-width: 56px; }
+.su-chip { font-size: 11px; font-family: var(--mono); padding: 1px 8px; border-radius: 7px; background: var(--panel-2); color: var(--dim); border: 1px solid var(--border); }
+.su-chip.sev-high { color: var(--bad); border-color: #5b2c2c; }
+.su-chip.sev-med { color: var(--warn); border-color: #5b4a2c; }
+.su-chip.sev-low { color: var(--accent); border-color: #2c426b; }
+.su-chip.sev-info { color: var(--dim); }
+.su-proof { font-size: 11.5px; color: var(--dim); line-height: 1.6; border-left: 2px solid var(--border); padding-left: 10px; margin-bottom: 10px; }
+.su-links { display: flex; gap: 14px; font-size: 12px; }
+.su-links a { color: var(--accent); text-decoration: none; }
+.su-links a:hover { text-decoration: underline; }
+.su-doc { color: var(--dim); font-family: var(--mono); font-size: 11px; }

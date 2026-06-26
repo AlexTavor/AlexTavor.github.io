@@ -404,6 +404,21 @@ function classBadge(c3) {
   const cls = c3 || "pending";
   return /* @__PURE__ */ u3("span", { class: "fc-badge fc-" + cls, children: cls === "real-gap" ? "real gap" : cls });
 }
+function fmtMin(m3) {
+  return m3 < 9.5 ? m3.toFixed(1) : String(Math.round(m3));
+}
+function CostChip(props) {
+  const c3 = props.cost;
+  if (!c3 || c3.est == null && c3.actual == null) return null;
+  let label = c3.est != null ? "~" + fmtMin(c3.est) + "m" : "";
+  if (c3.actual != null) label += (label ? " \u2192 " : "") + fmtMin(c3.actual) + "m";
+  if (c3.drift != null) label += " (" + c3.drift.toFixed(2) + "\xD7)";
+  const title = (c3.est != null ? "estimated " + fmtMin(c3.est) + " min to prove" : "no estimate") + (c3.actual != null ? " \xB7 actual " + fmtMin(c3.actual) + " min" : "") + (c3.drift != null ? " \xB7 drift " + c3.drift.toFixed(2) + "\xD7" : "") + (c3.overBudget ? " \xB7 over the gate budget" : "");
+  return /* @__PURE__ */ u3("span", { class: "rm-cost" + (c3.overBudget ? " over" : ""), title, children: [
+    c3.overBudget ? "\u26A0 " : "",
+    label
+  ] });
+}
 function Finding(props) {
   const [open, setOpen] = d2(false);
   const f4 = props.f;
@@ -455,7 +470,8 @@ function Unit(props) {
       /* @__PURE__ */ u3("span", { class: "rm-fc", children: [
         (u4.findingFingerprints || []).length,
         " findings"
-      ] })
+      ] }),
+      /* @__PURE__ */ u3(CostChip, { cost: u4.cost })
     ] }),
     u4.summary ? /* @__PURE__ */ u3("div", { class: "rm-summary", children: u4.summary }) : null,
     open ? /* @__PURE__ */ u3("div", { class: "rm-dossier", children: findings.length ? findings.map((f4) => /* @__PURE__ */ u3(Finding, { f: f4, isPrivate: props.isPrivate })) : /* @__PURE__ */ u3("p", { class: "fd-empty dim", children: "no joined findings" }) }) : null
@@ -479,9 +495,112 @@ function RoadmapView(props) {
         " denied \xB7 ",
         c3.pending ?? 0,
         " pending"
-      ] })
+      ] }),
+      payload.budgetMinutes != null ? /* @__PURE__ */ u3("span", { class: "rm-budget", title: "carve gate budget per chunk (config carve.budgetMinutes)", children: [
+        "budget ",
+        fmtMin(payload.budgetMinutes),
+        "m"
+      ] }) : null
     ] }),
     /* @__PURE__ */ u3("div", { class: "rm-list", children: units.map((u4) => /* @__PURE__ */ u3(Unit, { u: u4, isPrivate: props.projectPrivate })) })
+  ] });
+}
+
+// ui/src/components/SummaryPanel.tsx
+var num = (n2) => typeof n2 === "number" && Number.isFinite(n2) ? Math.round(n2).toLocaleString() : "\u2014";
+function duration(ms) {
+  if (typeof ms !== "number" || !Number.isFinite(ms) || ms <= 0) return "\u2014";
+  const s3 = Math.round(ms / 1e3);
+  return s3 < 60 ? `${s3}s` : `${Math.floor(s3 / 60)}m ${s3 % 60}s`;
+}
+function ageLabel(days) {
+  if (typeof days !== "number" || !Number.isFinite(days)) return "\u2014";
+  if (days < 90) return `${Math.round(days)}d`;
+  const y3 = Math.floor(days / 365);
+  const m3 = Math.round(days % 365 / 30);
+  return y3 > 0 ? `${y3}y ${m3}m` : `${m3}m`;
+}
+function Stat(props) {
+  return /* @__PURE__ */ u3("div", { class: "su-stat", children: [
+    /* @__PURE__ */ u3("div", { class: "su-l", children: props.label }),
+    /* @__PURE__ */ u3("div", { class: "su-v", children: props.value }),
+    props.hint ? /* @__PURE__ */ u3("div", { class: "su-hint", children: props.hint }) : null
+  ] });
+}
+function Chips(props) {
+  const keys = (props.order || []).filter((k3) => props.counts[k3]).concat(Object.keys(props.counts).filter((k3) => !(props.order || []).includes(k3)));
+  if (!keys.length) return null;
+  return /* @__PURE__ */ u3("div", { class: "su-chiprow", children: [
+    /* @__PURE__ */ u3("span", { class: "su-chiplabel", children: props.label }),
+    keys.map((k3) => /* @__PURE__ */ u3("span", { class: "su-chip " + (props.cls ? props.cls(k3) : ""), children: [
+      k3,
+      " ",
+      props.counts[k3]
+    ] }))
+  ] });
+}
+function RunRow(props) {
+  const r3 = props.run;
+  if (!r3) {
+    return /* @__PURE__ */ u3("div", { class: "su-run su-run-empty", children: [
+      /* @__PURE__ */ u3("span", { class: "su-l", children: "analysis run" }),
+      /* @__PURE__ */ u3("span", { class: "su-na", children: "not recorded" }),
+      /* @__PURE__ */ u3("span", { class: "su-hint", children: "cost, duration, and model are captured for analyses run from here on" })
+    ] });
+  }
+  return /* @__PURE__ */ u3("div", { class: "su-run", children: [
+    /* @__PURE__ */ u3("span", { class: "su-l", children: "analysis run" }),
+    /* @__PURE__ */ u3("span", { class: "su-rv", children: r3.model || "model \u2014" }),
+    /* @__PURE__ */ u3("span", { class: "su-rv", children: duration(r3.durationMs) }),
+    /* @__PURE__ */ u3("span", { class: "su-rv", children: typeof r3.costUsd === "number" ? "$" + r3.costUsd.toFixed(2) : typeof r3.tokens === "number" ? num(r3.tokens) + " tok" : "cost \u2014" })
+  ] });
+}
+var sevClass = (k3) => k3 === "high" ? "sev-high" : k3 === "medium" ? "sev-med" : k3 === "low" ? "sev-low" : "sev-info";
+function SummaryPanel(props) {
+  const s3 = props.summary;
+  if (!s3) return /* @__PURE__ */ u3("div", { class: "gx-msg dim", children: "loading summary\u2026" });
+  const e3 = s3.entry || {};
+  const a3 = e3.analysis || {};
+  const f4 = s3.findings;
+  const langs = e3.languages ? Object.entries(e3.languages).sort((x2, y3) => y3[1] - x2[1]).slice(0, 3).map(([k3]) => k3).join(", ") : null;
+  const grade = typeof a3.gradeScore === "number" ? Math.round(a3.gradeScore * 100) + "%" : "\u2014";
+  const dup = e3.duplications && typeof e3.duplications.percent === "number" ? e3.duplications.percent.toFixed(1) + "%" : e3.duplications && typeof e3.duplications.clones === "number" ? num(e3.duplications.clones) + " clones" : "\u2014";
+  return /* @__PURE__ */ u3("div", { class: "su", children: [
+    /* @__PURE__ */ u3("div", { class: "su-head", children: [
+      /* @__PURE__ */ u3("div", { class: "su-title", children: s3.name }),
+      /* @__PURE__ */ u3("div", { class: "su-sub", children: [e3.domain, e3.framework, e3.architecture].filter(Boolean).join("  \xB7  ") || "\u2014" }),
+      /* @__PURE__ */ u3("div", { class: "su-prov", children: [e3.visibility, e3.license && "license: " + e3.license, typeof e3.stars === "number" ? e3.stars + "\u2605" : null, e3.lastPush && "last push " + e3.lastPush, e3.analyzedAt && "analyzed " + e3.analyzedAt].filter(Boolean).join("  \xB7  ") })
+    ] }),
+    /* @__PURE__ */ u3(RunRow, { run: s3.run }),
+    /* @__PURE__ */ u3("div", { class: "su-grid", children: [
+      /* @__PURE__ */ u3(Stat, { label: "lines of code", value: num(e3.loc) }),
+      /* @__PURE__ */ u3(Stat, { label: "source files", value: num(e3.sourceFiles) }),
+      /* @__PURE__ */ u3(Stat, { label: "test files", value: num(e3.testFiles), hint: typeof e3.testCount === "number" ? num(e3.testCount) + " tests" : void 0 }),
+      /* @__PURE__ */ u3(Stat, { label: "languages", value: typeof e3.tsPercent === "number" ? e3.tsPercent + "% TS" : "\u2014", hint: langs || void 0 }),
+      /* @__PURE__ */ u3(Stat, { label: "duplication", value: dup }),
+      /* @__PURE__ */ u3(Stat, { label: "repo age", value: ageLabel(e3.git?.ageDays), hint: e3.git && typeof e3.git.activeSpanDays === "number" ? ageLabel(e3.git.activeSpanDays) + " active" : void 0 }),
+      /* @__PURE__ */ u3(Stat, { label: "coverage", value: e3.coverage && !/^(not measured|n\/a)/i.test(e3.coverage) ? e3.coverage : "\u2014" }),
+      /* @__PURE__ */ u3(Stat, { label: "test adequacy", value: grade, hint: a3.gradeMutants && typeof a3.gradeMutants.total === "number" ? a3.gradeMutants.killed + "/" + a3.gradeMutants.total + " mutants caught" : void 0 }),
+      /* @__PURE__ */ u3(Stat, { label: "roadmap areas", value: num(a3.fullMapUnits), hint: a3.ranFullMap ? "session MAP" : "static carve" }),
+      /* @__PURE__ */ u3(Stat, { label: "gate verdict", value: a3.checkVerdict || "\u2014" })
+    ] }),
+    /* @__PURE__ */ u3("div", { class: "su-findings", children: [
+      /* @__PURE__ */ u3("div", { class: "su-ftotal", children: [
+        /* @__PURE__ */ u3("span", { class: "su-fnum", children: num(f4.total) }),
+        " findings"
+      ] }),
+      /* @__PURE__ */ u3(Chips, { label: "severity", counts: f4.bySeverity, order: ["high", "medium", "low", "info"], cls: sevClass }),
+      /* @__PURE__ */ u3(Chips, { label: "kind", counts: f4.byKind, order: ["footgun", "risk", "silent-failure", "code-map", "mutant"] }),
+      /* @__PURE__ */ u3(Chips, { label: "status", counts: f4.byStatus, order: ["real-gap", "confirmed", "pending", "benign", "equivalent"] })
+    ] }),
+    /* @__PURE__ */ u3("div", { class: "su-proof", children: "Every issue here was schema-validated, anchored to a real file, and confirmed by a reviewer before it was listed. Where tests exist, adequacy was proven by fault injection, not estimated. Findings stay pending until expert review." }),
+    e3.repo || e3.doc ? /* @__PURE__ */ u3("div", { class: "su-links", children: [
+      e3.repo ? /* @__PURE__ */ u3("a", { href: e3.repo.startsWith("http") ? e3.repo : "https://github.com/" + e3.repo, target: "_blank", rel: "noopener noreferrer", children: "repository" }) : null,
+      e3.doc ? /* @__PURE__ */ u3("span", { class: "su-doc", children: [
+        "writeup: ",
+        e3.doc
+      ] }) : null
+    ] }) : null
   ] });
 }
 
@@ -511,6 +630,7 @@ function App() {
   const [active, setActive] = d2(null);
   const [err, setErr] = d2(null);
   const [roadmap, setRoadmap] = d2(null);
+  const [summary, setSummary] = d2(null);
   const [mapErr, setMapErr] = d2(null);
   y2(() => {
     fetch("/gallery/api/corpus.json").then((r3) => r3.json()).then((d3) => {
@@ -522,8 +642,14 @@ function App() {
     if (!active) return;
     let live = true;
     setRoadmap(null);
+    setSummary(null);
     setMapErr(null);
-    fetch("/gallery/api/roadmap/" + encodeURIComponent(active) + ".json").then((r3) => r3.json()).then((d3) => {
+    const q2 = encodeURIComponent(active);
+    fetch("/gallery/api/summary/" + q2 + ".json").then((r3) => r3.json()).then((d3) => {
+      if (live) setSummary(d3);
+    }).catch(() => {
+    });
+    fetch("/gallery/api/roadmap/" + q2 + ".json").then((r3) => r3.json()).then((d3) => {
       if (live) setRoadmap(d3);
     }).catch((e3) => {
       if (live) setMapErr(String(e3));
@@ -551,10 +677,13 @@ function App() {
     ] }),
     /* @__PURE__ */ u3("div", { class: "gx-body", children: [
       /* @__PURE__ */ u3(Rail, { projects: listing.projects, active, onSelect: setActive }),
-      /* @__PURE__ */ u3("section", { class: "gx-detail", children: !active ? /* @__PURE__ */ u3("div", { class: "gx-msg dim", children: "select a project" }) : mapErr ? /* @__PURE__ */ u3("div", { class: "gx-msg", children: [
-        "failed to load the map: ",
-        mapErr
-      ] }) : /* @__PURE__ */ u3(RoadmapView, { payload: roadmap, interactive: false, projectPrivate: listing.projects.find((p3) => p3.name === active)?.visibility === "private" }) })
+      /* @__PURE__ */ u3("section", { class: "gx-detail", children: !active ? /* @__PURE__ */ u3("div", { class: "gx-msg dim", children: "select a project" }) : /* @__PURE__ */ u3(S, { children: [
+        /* @__PURE__ */ u3(SummaryPanel, { summary }),
+        mapErr ? /* @__PURE__ */ u3("div", { class: "gx-msg", children: [
+          "failed to load the map: ",
+          mapErr
+        ] }) : /* @__PURE__ */ u3(RoadmapView, { payload: roadmap, interactive: false, projectPrivate: listing.projects.find((p3) => p3.name === active)?.visibility === "private" })
+      ] }) })
     ] })
   ] });
 }
