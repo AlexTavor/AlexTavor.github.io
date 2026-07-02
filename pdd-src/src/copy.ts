@@ -2,8 +2,17 @@
 // one-line help per view, and what each edge type means. Kept here (not in pdd-graph.json) because it
 // is app chrome, not graph data.
 
+// The phrase in PDD_INTRO to visually emphasize. Home splits the intro on this exact substring and
+// wraps it, so the one-line pitch of the method stands out. Must stay an exact substring of PDD_INTRO.
+export const PDD_INTRO_HIGHLIGHT = "a method for changing code you do not fully trust";
+
 export const PDD_INTRO =
   "PDD is Proof-Driven Development: a method for changing code you do not fully trust (legacy or AI-generated) without breaking it. It runs in five moves. MAP recovers what the code actually does. PIN locks that behavior in tests. CARVE cuts the work into small, de-risked units. SHIP makes each change under mechanical gates. PROVE shows the behavior was preserved and the debt burned down. The bet behind it: writing code is cheap and expert attention is the bottleneck, so the method spends proof where a mistake would be expensive and skips it where it would not.";
+
+// What this page is, shown right after the method intro so a visitor knows what they are looking at
+// and why it is a graph rather than a document.
+export const EXPLORER_ABOUT =
+  "This explorer is an interactive diagram of that method. The same set of rules is drawn from several angles: how an engagement runs, how the rules nest, which move each one applies at, how they depend on each other, and what failures each one defends against. It exists so you can trace any rule across those angles and see how the parts connect, instead of reading one long document.";
 
 export interface GlossaryEntry { term: string; def: string; }
 

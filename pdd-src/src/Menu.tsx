@@ -1,5 +1,6 @@
 import Legend from './Legend';
 import { GLOSSARY } from './copy';
+import { rich } from './richText';
 import type { Toggles } from './buildElements';
 
 // Mobile-only modal: the optional bits (search, the provisional toggle, the legend, and the glossary)
@@ -51,7 +52,7 @@ export default function Menu({ query, setQuery, runSearch, labels, toggles, flip
           <b>Glossary</b>
           <dl className="glossary">
             {GLOSSARY.map((g) => (
-              <div className="g-entry" key={g.term}><dt>{g.term}</dt><dd>{g.def}</dd></div>
+              <div className="g-entry" key={g.term}><dt>{g.term}</dt><dd>{rich(g.def)}</dd></div>
             ))}
           </dl>
         </div>

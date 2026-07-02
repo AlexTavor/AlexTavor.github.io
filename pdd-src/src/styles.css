@@ -68,6 +68,12 @@ body { background: var(--bg); color: var(--text); font: 13px/1.45 ui-sans-serif,
 .home h1 { font-size: 22px; color: #fff; margin: 0 0 12px; }
 .home h2 { font-size: 15px; color: #fff; margin: 26px 0 10px; }
 .home .lead { font-size: 14px; line-height: 1.65; color: var(--text); margin: 0; }
+.home .lead .hl { color: #fbbf24; font-weight: 600; }
+
+/* One identity for the five move keywords wherever copy names them (intro, glossary, menu). Tinted in
+   the same blue as a verb node in the graph, so the word and its node read as the same thing. */
+.term { color: #93c5fd; font-weight: 600; background: rgba(37, 99, 235, 0.16); border-radius: 4px; padding: 0 4px; white-space: nowrap; }
+.home .about { font-size: 14px; line-height: 1.65; color: #cbd5e1; margin: 14px 0 0; }
 .instructions { margin: 0; padding-left: 18px; }
 .instructions li { margin: 6px 0; line-height: 1.5; color: var(--text); }
 .glossary { margin: 0; }
