@@ -17,7 +17,7 @@ export const GLOSSARY: GlossaryEntry[] = [
 ];
 
 export const INSTRUCTIONS: string[] = [
-  "Pick a view from the tabs above. Click the active tab again to come back to this overview.",
+  "Pick a view from the tabs at the top: each shows the same method from a different angle. Come back to this 'Read me' tab any time for the overview and glossary.",
   "Click any node to read its full text and relationships. Double-click a node to zoom to its neighborhood; double-click the background to zoom back out.",
   "Click an edge to see what the relationship means. Use search to jump to a node by name.",
   "Toggle 'provisional' to show or hide newer, not-yet-proven rules.",
@@ -49,6 +49,7 @@ export const EDGE_HELP: Record<string, string> = {
 
 // Compact icon per view, shown on the tabs when the screen is too narrow for the text label.
 export const VIEW_EMOJI: Record<string, string> = {
+  readme: "📖",
   flow: "🔀",
   taxonomy: "🗂️",
   application: "🎯",

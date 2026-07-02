@@ -1,7 +1,7 @@
 import { PDD_INTRO, GLOSSARY, INSTRUCTIONS } from './copy';
 
-// Shown when no view (tab) is selected: what PDD is, how to use the explorer, and a glossary of the
-// terms the graph uses.
+// The content of the default "Read me" tab (viewId === README_ID): what PDD is, how to use the
+// explorer, and a glossary of the terms the graph uses.
 export default function Home() {
   return (
     <div className="home">

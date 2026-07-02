@@ -10,9 +10,12 @@ import type { Toggles } from './buildElements';
 
 const ALL_LABELS = [...new Set(graph.nodes.map((n) => n.label))].sort();
 
+// The "Read me" tab is selected on load and always available. It shows the overview + glossary
+// (the Home component) rather than a graph view, so there is never a blank no-tab-selected state.
+const README_ID = 'readme';
+
 export default function App() {
-  // viewId === null is the home/overview state (no tab selected).
-  const [viewId, setViewId] = useState<string | null>(null);
+  const [viewId, setViewId] = useState<string>(README_ID);
   const [toggles, setToggles] = useState<Toggles>({ showProvisional: true });
   const [selected, setSelected] = useState<string | null>(null);
   const [focus, setFocus] = useState<FocusTarget | null>(null);
@@ -21,7 +24,10 @@ export default function App() {
   const [orphanToast, setOrphanToast] = useState(orphanRules.length > 0);
   const nonce = useRef(0);
 
-  const view = useMemo(() => (viewId ? graph.views.find((v) => v.id === viewId) ?? null : null), [viewId]);
+  const view = useMemo(
+    () => (viewId === README_ID ? null : graph.views.find((v) => v.id === viewId) ?? null),
+    [viewId],
+  );
   const onSelect = useCallback((id: string | null) => setSelected(id), []);
   const flip = (k: keyof Toggles) => setToggles((t) => ({ ...t, [k]: !t[k] }));
 
@@ -33,13 +39,14 @@ export default function App() {
     setFocus({ id: nodeId, nonce: ++nonce.current });
   }, []);
 
-  // Select a tab, or toggle it off (back to home). Clear the node selection either way so the right bar
-  // shows the new view's explanation, not a stale node from the previous view.
+  // Switch to a tab. There is always exactly one tab selected (the "Read me" tab by default), so a
+  // click just selects it — no toggle-off-to-blank. Clear the node selection so the right bar shows
+  // the new view's explanation, not a stale node from the previous view.
   const pickView = (id: string) => {
     setSelected(null);
-    setViewId((cur) => (cur === id ? null : id));
+    setViewId(id);
   };
-  const goHome = () => { setSelected(null); setViewId(null); };
+  const goHome = () => { setSelected(null); setViewId(README_ID); };
 
   const runSearch = (text: string) => {
     const q = text.trim().toLowerCase();
@@ -58,6 +65,16 @@ export default function App() {
       <header className="topbar">
         <button className="brand" onClick={goHome} title="What PDD is, glossary, and how to use this">PDD Explorer</button>
         <nav className="tabs">
+          <button
+            className={'tab' + (viewId === README_ID ? ' active' : '')}
+            onClick={() => pickView(README_ID)}
+            title="Read me: what PDD is and how to use this explorer"
+            aria-label="Read me"
+            aria-current={viewId === README_ID ? 'page' : undefined}
+          >
+            <span className="tab-emoji" aria-hidden="true">{VIEW_EMOJI[README_ID]}</span>
+            <span className="tab-text">Read me<small>start here</small></span>
+          </button>
           {graph.views.map((v) => {
             const [head, tail] = v.title.split('—');
             return (
@@ -67,6 +84,7 @@ export default function App() {
                 onClick={() => pickView(v.id)}
                 title={v.title}
                 aria-label={v.title}
+                aria-current={v.id === viewId ? 'page' : undefined}
               >
                 <span className="tab-emoji" aria-hidden="true">{VIEW_EMOJI[v.id] ?? '•'}</span>
                 <span className="tab-text">{head.trim()}{tail && <small>{tail.trim()}</small>}</span>

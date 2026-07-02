@@ -113,7 +113,7 @@ export default function DetailPanel({ view, nodeId, toggles, onShowIn, onClose }
         <h2>{head.trim()}</h2>
         {tail && <p className="summary">{tail.trim()}</p>}
         <p className="viewhelp">{VIEW_HELP[view.id] ?? ''}</p>
-        <p className="hint">Click any node to inspect it. Double-click a node to zoom in; double-click the background to zoom out. Click the active tab to return to the overview.</p>
+        <p className="hint">Click any node to inspect it. Double-click a node to zoom in; double-click the background to zoom out. The “Read me” tab has the overview and glossary.</p>
       </aside>
     );
   }
