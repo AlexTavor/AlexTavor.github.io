@@ -53,13 +53,22 @@ export default function App() {
   const [orphanToast, setOrphanToast] = useState(orphanRules.length > 0);
   const nonce = useRef(1);
 
-  // Mirror view/selection into the hash. replaceState never fires hashchange, so this cannot loop
-  // with the listener below.
+  // Mirror view/selection into the hash. A VIEW change is a navigation and pushes a history
+  // entry (Back returns to where you were — e.g. a guide→graph jump backs out to the guide
+  // section, not out of the site); selection/scroll-spy changes within a view replace, so
+  // reading never spams history. Neither fires hashchange, so this cannot loop with the
+  // listener below — and the equal-hash guard means Back/Forward (URL already updated) never
+  // triggers a spurious push.
+  const mirroredView = useRef(viewId);
   useEffect(() => {
     const hash = viewId === README_ID ? '' : `#${viewId}${selected ? '/' + encodeURIComponent(selected) : ''}`;
     const current = window.location.hash;
+    const viewChanged = mirroredView.current !== viewId;
+    mirroredView.current = viewId;
     if (hash === current || (!hash && !current)) return;
-    history.replaceState(null, '', hash || window.location.pathname + window.location.search);
+    const url = hash || window.location.pathname + window.location.search;
+    if (viewChanged) history.pushState(null, '', url);
+    else history.replaceState(null, '', url);
   }, [viewId, selected]);
 
   // Manual hash edits / links clicked inside the page: apply them as a view+select+center jump.

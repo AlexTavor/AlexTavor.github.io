@@ -161,23 +161,28 @@ body { background: var(--bg); color: var(--text); font: 13px/1.45 ui-sans-serif,
 /* Entity affordances: one visual identity per behavior, learned once.
    term = dotted (hover gloss) · source = solid blue + arrow (new tab) · jump = dashed blue
    (in-app graph jump) · artifact = green (snapshot modal) · concept = grey solid (menu). */
+/* All affordances use text-decoration, never borders: an underline change can't reflow the
+   line (a border materializing on hover shifts the whole paragraph). Every clickable entity
+   is visibly marked at rest. */
 .ent { font: inherit; }
 button.ent { background: none; border: none; padding: 0; color: inherit; cursor: pointer; }
-.ent-term { border-bottom: 1px dotted var(--muted); cursor: help; position: relative; }
+.ent-term { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; cursor: help; position: relative; }
 .ent-term:hover::after, .ent-term:focus::after {
   content: attr(data-gloss); position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
   width: 340px; max-width: 72vw; padding: 9px 11px; border-radius: 6px;
   background: var(--panel); border: 1px solid var(--line); box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
   font-size: 12px; font-style: normal; font-weight: 400; line-height: 1.5; white-space: normal; color: var(--text);
 }
-.ent-src { color: #60a5fa; text-decoration: none; border-bottom: 1px solid rgba(96, 165, 250, .5); }
-.ent-src:hover { border-bottom-color: #60a5fa; }
+.ent-src { color: #60a5fa; text-decoration: underline solid rgba(96, 165, 250, .5); text-underline-offset: 3px; }
+.ent-src:hover { text-decoration-color: #60a5fa; }
 .ent-src::after { content: '↗'; font-size: .75em; margin-left: 2px; opacity: .8; }
-.ent-jump { color: #60a5fa; border-bottom: 1px dashed rgba(96, 165, 250, .6); }
-.ent-jump:hover { border-bottom-style: solid; }
-.ent-artifact { color: #4ade80; border-bottom: 1px solid rgba(74, 222, 128, .5); }
+.ent-jump { color: #60a5fa; text-decoration: underline dashed rgba(96, 165, 250, .6); text-underline-offset: 3px; }
+.ent-jump:hover { text-decoration-color: #60a5fa; text-decoration-style: solid; }
+.ent-artifact { color: #4ade80; text-decoration: underline solid rgba(74, 222, 128, .5); text-underline-offset: 3px; }
+.ent-artifact:hover { text-decoration-color: #4ade80; }
 .ent-artifact::after { content: ' ▣'; font-size: .8em; }
-.ent-concept { color: var(--text); border-bottom: 1px solid #64748b; }
+.ent-concept { color: var(--text); text-decoration: underline solid #64748b; text-underline-offset: 3px; }
+.ent-concept:hover { text-decoration-color: #94a3b8; }
 .ent-concept .chev { color: var(--muted); }
 .ent-missing { background: #7f1d1d; border-radius: 3px; padding: 0 4px; }
 .ent-concept-wrap { position: relative; }
