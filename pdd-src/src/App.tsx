@@ -3,6 +3,7 @@ import { graph, orphanRules } from './model';
 import PddGraph, { type FocusTarget } from './PddGraph';
 import DetailPanel from './DetailPanel';
 import Home from './Home';
+import Guide from './Guide';
 import Legend from './Legend';
 import Menu from './Menu';
 import { VIEW_EMOJI } from './copy';
@@ -14,6 +15,10 @@ const ALL_LABELS = [...new Set(graph.nodes.map((n) => n.label))].sort();
 // (the Home component) rather than a graph view, so there is never a blank no-tab-selected state.
 const README_ID = 'readme';
 
+// The guide tab: what PDD does, how, and why — documentation rendered from guide.json +
+// entities.json. Not a graph view — its sections are the method's moves.
+const GUIDE_ID = 'guide';
+
 // Deep links: #<viewId>[/<nodeId>] — the URL names a view and optionally a node in it, so external
 // documents can link straight to a node (e.g. #flow/verb.map). The current view/selection is mirrored
 // back into the hash with replaceState (no history spam; copying the address bar shares the spot).
@@ -22,7 +27,7 @@ function parseHash(h: string): { viewId: string; nodeId: string | null } | null 
   const raw = h.replace(/^#/, '');
   if (!raw) return null;
   const [v, n] = raw.split('/').map((s) => decodeURIComponent(s));
-  const viewOk = v === README_ID || graph.views.some((view) => view.id === v);
+  const viewOk = v === README_ID || v === GUIDE_ID || graph.views.some((view) => view.id === v);
   if (!viewOk) return null;
   const nodeId = n && graph.nodes.some((node) => node.id === n) ? n : null;
   return { viewId: v, nodeId };
@@ -116,6 +121,16 @@ export default function App() {
             <span className="tab-emoji" aria-hidden="true">{VIEW_EMOJI[README_ID]}</span>
             <span className="tab-text">Read me<small>start here</small></span>
           </button>
+          <button
+            className={'tab' + (viewId === GUIDE_ID ? ' active' : '')}
+            onClick={() => pickView(GUIDE_ID)}
+            title="Guide: what PDD does, how, and why — with links into everything"
+            aria-label="Guide"
+            aria-current={viewId === GUIDE_ID ? 'page' : undefined}
+          >
+            <span className="tab-emoji" aria-hidden="true">📘</span>
+            <span className="tab-text">Guide<small>how PDD works</small></span>
+          </button>
           {graph.views.map((v) => {
             const [head, tail] = v.title.split('—');
             return (
@@ -151,7 +166,9 @@ export default function App() {
           <label><input type="checkbox" checked={toggles.showProvisional} onChange={() => flip('showProvisional')} /> provisional</label>
         </div>
       </header>
-      {view ? (
+      {viewId === GUIDE_ID ? (
+        <Guide onJump={showInView} />
+      ) : view ? (
         <main className="stage">
           <PddGraph view={view} toggles={toggles} onSelect={onSelect} focus={focus} />
           <DetailPanel view={view} nodeId={selected} toggles={toggles} onShowIn={showInView} onClose={() => setSelected(null)} />

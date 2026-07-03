@@ -1,0 +1,223 @@
+{
+ "version": 1,
+ "sections": [
+  {
+   "id": "overview",
+   "title": "Overview",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "[[explorer.foundation.thesis|Implementation is cheap; expert attention is the bottleneck.]] When code is written faster than it is read, one failure dominates: **code that passes every check and is still wrong.** The tools that detect this are decades old \u2014 what was never affordable is the labor of acting on what they find. Agents changed that."
+    },
+    {
+     "kind": "p",
+     "text": "PDD is a method for changing code you can't trust \u2014 legacy, or AI-written \u2014 without breaking it. Every practice in it is held to one standard: run, trigger, or leave a record \u2014 [[explorer.pillar.trustworthy-green|gates that fail the build in block mode]], skills that fire mid-task, [[term.ledger|decisions in a replayable ledger]] \u2014 so the machine's work is validated, not trusted, and human judgment is spent at a few recorded decision points. Five moves: [[explorer.verb.map|MAP]] recovers what the code does, [[explorer.verb.pin|PIN]] locks it in tests, [[explorer.verb.carve|CARVE]] cuts work to attention size, [[explorer.verb.ship|SHIP]] changes code under gates, [[explorer.verb.prove|PROVE]] confirms by mutation that the tests would catch a regression."
+    }
+   ]
+  },
+  {
+   "id": "failure",
+   "title": "The failure it targets",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "Code can pass every check and still be wrong. Two causes:"
+    },
+    {
+     "kind": "ul",
+     "items": [
+      "[[explorer.failure.adequacy-gap|Tests that pass but don't constrain the behavior]] \u2014 they would pass even if the code were wrong. Coverage can't detect this: a line that ran is not a line a test would fail for.",
+      "[[explorer.failure.visibility-gap|Errors handled silently]] \u2014 a broken system that still looks healthy."
+     ]
+    },
+    {
+     "kind": "p",
+     "text": "Review can catch both, at the cost of expert attention \u2014 the one resource that doesn't scale with generated code. PDD makes the checks mechanical: [[explorer.pillar.trustworthy-green|a verdict that fails the build]] \u2014 the static checks cheap to re-run, the mutation pass explicitly budgeted \u2014 so attention goes only where judgment is needed."
+    },
+    {
+     "kind": "p",
+     "text": "Each move closes one way the failure survives: MAP because the names mislead; PIN because there is no spec until you write one; CARVE because oversized work gets skimmed, not reviewed; SHIP because a convention that is not enforced in CI erodes; PROVE because a green suite is a claim that has to be audited."
+    }
+   ]
+  },
+  {
+   "id": "map",
+   "title": "MAP \u2014 recover what the system does",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "**Why.** In untrusted code the names lie \u2014 `validate` functions that don't, `cleanup` that leaks. A plan built on the names inherits their errors, so the first move is [[skill-read-the-system|read the implementation, not the signature]]."
+    },
+    {
+     "kind": "p",
+     "text": "**What.** For the operator: the [[term.system-truth-atlas|System Truth Atlas]] \u2014 verified code map, [[term.footgun|footgun register]], recovered-risk register, [[term.silent-failure|silent-failure census]]. For the machine: a problem list ([[artifact.merged-findings|findings]]) that the next moves consume risk-first."
+    },
+    {
+     "kind": "p",
+     "text": "**How.** [[doc-reference-pdd-map|`pdd map`]] runs three layers in cost order ([[code.spine|the spine]]), like a CI pipeline \u2014 cheap stages first:"
+    },
+    {
+     "kind": "ol",
+     "items": [
+      "*Mechanical* \u2014 the enabled static gates (nine in the registry), then targeted mutation at the boundaries the tests claim to cover.",
+      "*Deterministic* \u2014 subsystems ranked by [[code.scope-ranking|finding density and git churn]], so the expensive read starts where the risk concentrates.",
+      "*Agentic* \u2014 what static analysis can't detect (a `validate` that returns early, a swallowed error that matters), an agent finds by reading, highest-ranked subsystem first. Its findings are data, and the CLI validates them at [[concept.write-boundary|the write boundary]] \u2014 input validation, applied to the agent."
+     ]
+    },
+    {
+     "kind": "p",
+     "text": "**Proof.** A finding that cites a nonexistent source file is rejected before write. The mechanical layer adds no randomness of its own; re-runs are as reproducible as the project's test suite. The downstream carve is byte-identical on unchanged input, so a re-map's diff shows what changed (plus a run timestamp)."
+    },
+    {
+     "kind": "p",
+     "text": "MAP hands PIN a problem list and a model of the system accurate enough to lock behavior against."
+    }
+   ],
+   "subtitle": "Standard practice: design recovery, plus a static-analysis and mutation sweep."
+  },
+  {
+   "id": "pin",
+   "title": "PIN \u2014 lock current behavior",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "**Why.** There is no spec. The code's current behavior \u2014 bugs included \u2014 is the only truth, and until it is captured, [[explorer.failure.behavior-drift|drift is undetectable]]: a change can break behavior nobody wrote down while the suite stays green."
+    },
+    {
+     "kind": "p",
+     "text": "**What.** Two locks. [[term.characterization-test|Characterization tests]] pin the behaviors a change could disturb, held to the same adequacy bar as any test ([[term.boundary-test|boundary case]], [[term.no-op-path|no-op path]], pinned values) \u2014 a happy-path-only pin constrains nothing. A [[term.reproducibility-baseline|reproducibility baseline]] pins the whole output: replay-and-diff where the system is deterministic, golden master where it isn't yet. A bug found while pinning is captured and flagged (expected-fail), not encoded as correct."
+    },
+    {
+     "kind": "p",
+     "text": "**How.** [[skill-characterize-before-change|Skills]] trigger during the change itself. Where determinism is missing, the clock, RNG, and I/O are injected as [[term.seam|seams]] \u2014 dependency injection at the test boundary \u2014 and making the system reproducible counts as a deliverable, not test overhead."
+    },
+    {
+     "kind": "p",
+     "text": "**Proof.** A pin is only real if it fails when behavior changes, and that is checked rather than assumed: SHIP's pin-values gate rejects assertions on a type or truthiness where a value was the point, and PROVE mutates the code under the pin to confirm the test notices. PIN has no CLI verb; it is enforced by what runs downstream."
+    },
+    {
+     "kind": "p",
+     "text": "PIN hands CARVE a locked baseline: change is detectable, so it can be planned."
+    }
+   ],
+   "subtitle": "Standard practice: characterization tests plus a golden master, held to an adequacy bar."
+  },
+  {
+   "id": "carve",
+   "title": "CARVE \u2014 cut work to attention size",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "**Why.** Work sized past attention doesn't get reviewed, it gets skimmed. A plan built on an unproven architectural assumption fails late, where rework is most expensive."
+    },
+    {
+     "kind": "p",
+     "text": "**What.** The remediation roadmap ([[artifact.units-json-carve-baseline|units.json]]): the problem list carved into [[term.unit|units]] \u2014 grouped by subsystem, [[term.attention-sized|banded to attention size]] (an oversized unit is flagged for a finer carve), risk-ranked, each rank traceable to the findings that produced it. For plans carrying architectural risk, a [[skill-derisk-gate|de-risk gate]]: a thin end-to-end spike proves the riskiest assumption before anything is built on it, ending in a GREEN / RED / OVERRIDE verdict."
+    },
+    {
+     "kind": "p",
+     "text": "**How.** The carve is [[code.carve|a pure function]] of the findings and the grouping: same input, byte-identical units \u2014 reproducible-build discipline applied to a planning artifact. Cost is the third sizing axis after unit- and PR-attention: an opt-in [[term.gate-budget|gate budget]] bounds each unit's estimated mutation cost in machine-minutes, calibrated from [[artifact.calibration-ledger|real runs]]; over-budget groups split until they fit or are atomic, and un-splittable ones are flagged (warn-first today)."
+    },
+    {
+     "kind": "p",
+     "text": "**Proof.** Each rank persists its [[term.riskscore|computed basis]] on the unit, so the ordering is traceable to inputs. Estimates are recorded against actuals, so the cost model is audited by its own history."
+    },
+    {
+     "kind": "p",
+     "text": "CARVE hands the operator the roadmap. The triage itself is deliberately manual."
+    }
+   ],
+   "subtitle": "Standard practice: work decomposition plus a de-risking spike \u2014 sized to reviewer attention, not story points."
+  },
+  {
+   "id": "gate",
+   "title": "The curate gate \u2014 operator triage",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "The machine has mapped, locked, and carved. It never approves or denies a unit \u2014 that decision is concentrated at one gate instead of distributed across every diff."
+    },
+    {
+     "kind": "p",
+     "text": "At [[term.curate-gate|the curate gate]] the operator triages each unit: approve, deny (rationale required), edit, [[term.disposition|split, move, or consume into a refactor]]. The roadmap is event-sourced: every decision appends to [[artifact.roadmap-ledger-audit|a ledger]], and the effective state is derived by replaying it over the untouched carve baseline \u2014 so a re-map never overwrites a decision, and any state reconstructs from history. Undo appends a reverting entry: git-revert semantics, never a rewrite."
+    },
+    {
+     "kind": "p",
+     "text": "[[term.sign-off|Sign-off]] closes the gate. It requires every unit approved or denied \u2014 pending blocks it \u2014 and freezes the roadmap: further edits are refused until an explicit reopen."
+    },
+    {
+     "kind": "p",
+     "text": "The run/trigger/record standard, applied to the human: judgment is a small set of recorded decisions that downstream stages are gated on."
+    }
+   ]
+  },
+  {
+   "id": "ship",
+   "title": "SHIP \u2014 change code under gates",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "**Why.** A convention enforced only in review comments does not survive throughput. The line holds where crossing it fails the build."
+    },
+    {
+     "kind": "p",
+     "text": "**What.** [[doc-reference-pdd-check-and-the-gates|Nine gates]], each catching one shape of green-but-wrong: a threshold no test references, a conditional cleanup with no test for the no-trigger path, an acquire with [[term.cover-the-mirror|no release]], a swallowed error, an assertion on a type where a value was the point. Modes (block / warn / off) live in committed config ([[artifact.constitution|the constitution]]) \u2014 the same trust model as branch protection: versioned, visible, enforced. The human half: each change ships as one operator-reviewable milestone."
+    },
+    {
+     "kind": "p",
+     "text": "**How.** [[code.gates-registry|`pdd check`]] runs in CI as a merge gate (a pre-commit hook running `check --staged` ships in `.pdd/hooks/` for one-line install); language-agnostic core gates plus [[term.language-pack|language packs]] behind a JSON contract (TypeScript and Python today). Most gates ship as warn and are promoted to block once their precision is proven on the codebase \u2014 the gate earns enforcement."
+    },
+    {
+     "kind": "p",
+     "text": "**Proof.** The verdict is an exit code, deterministic on re-run. The gates are proxies, and the proxy is audited: that is the next move."
+    }
+   ],
+   "subtitle": "Standard practice: CI quality gates \u2014 on test adequacy, not coverage."
+  },
+  {
+   "id": "prove",
+   "title": "PROVE \u2014 audit the green",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "**Why.** A green suite is a claim, not a fact. SHIP's gates report a boundary \"covered\"; only injecting the bug shows whether any test would fail."
+    },
+    {
+     "kind": "p",
+     "text": "**What.** Two commands with different jobs. [[code.prove|`pdd prove`]] is a targeted oracle: at each boundary the proxy gate marked covered, it flips the comparison operator and runs that boundary's tests \u2014 a survivor is a [[term.false-covered-boundary|false-covered boundary]] and fails the build. [[term.mutation-grading|`pdd grade`]] is a broad diagnostic: [[code.mutators|nine bug-shaped operators]] over a scope, producing a score and [[artifact.unit-mutation-survivors|a survivor list]] in which each entry is either a weak test to strengthen or dead code to delete."
+    },
+    {
+     "kind": "p",
+     "text": "**How.** No verdict is issued over a failing baseline. `grade` results are cached by content hash (`prove` re-runs each time); parallel grading runs in isolated git worktrees, with a crash-safe in-place fallback when a sandbox can't produce a verdict; a sampled run is marked sampled and excluded from cost calibration."
+    },
+    {
+     "kind": "p",
+     "text": "**Proof.** A killed mutant is direct evidence a pin holds. A survivor is a specific, reproducible counterexample \u2014 actionable per item, unlike an aggregate score. The verdict is exit 0 or 1; a run that can't produce one (red baseline, no test command) exits 2 instead of guessing."
+    }
+   ],
+   "subtitle": "Standard practice: mutation testing, tied to the no-drift baseline from PIN."
+  },
+  {
+   "id": "remediate",
+   "title": "REMEDIATE \u2014 close the loop",
+   "blocks": [
+    {
+     "kind": "p",
+     "text": "Findings are not the deliverable; merged fixes are. [[doc-reference-pdd-remediate|`pdd remediate`]] runs the approved roadmap and refuses to start without [[term.sign-off|sign-off]]."
+    },
+    {
+     "kind": "p",
+     "text": "Per unit, in risk order: an isolated worktree; a fix authored by a provider behind an interface (deterministic stand-ins today \u2014 the agent provider is the open piece); then the fixer's output is validated like everything else \u2014 the diff is [[code.remediate-loop|scope-checked]] against the unit, the check gates re-run against the post-fix code (prove/grade findings are not yet re-swept \u2014 those units route to the operator), the pinned suite guards regressions when the project has one, and only a certified-green fix is committed. The review model is a dependabot branch: one commit per unit with provenance trailers, the tool commits, the operator merges. Any attempt that produces an in-scope diff persists its patch before gating, so rejected fixes keep their review record."
+    },
+    {
+     "kind": "p",
+     "text": "`committed` means awaiting merge, not resolved. Whether a fix landed is determined by re-running MAP \u2014 the finding clears and the re-carve drops the unit \u2014 not by trusting a status field."
+    },
+    {
+     "kind": "p",
+     "text": "The loop: recover, lock, carve, judge, change, prove, re-map. Caches (atlas, mutation, check) and the decision ledger carry state across passes, so a re-pass pays only for what changed."
+    }
+   ]
+  }
+ ]
+}

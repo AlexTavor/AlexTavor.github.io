@@ -1,0 +1,2001 @@
+{
+ "version": 1,
+ "generatedAt": "2026-07-03",
+ "behaviors": {
+  "term": "tooltip",
+  "artifact": "snapshot-modal",
+  "source": "new-tab",
+  "concept": "menu"
+ },
+ "linkBases": {
+  "explorer": "https://alextavor.github.io/pdd/",
+  "github": "https://github.com/AlexTavor/proof-driven-development/blob/main/"
+ },
+ "entities": [
+  {
+   "id": "term.the-five-moves",
+   "type": "term",
+   "label": "the five moves",
+   "gloss": "PDD's workflow: MAP recovers what the system actually does, PIN locks it in tests, CARVE splits work review-sized, SHIP changes it under gates, PROVE shows behavior held and the debt is gone.",
+   "source": "README.md#the-five-moves",
+   "aliases": [
+    "MAP",
+    "PIN",
+    "CARVE",
+    "SHIP",
+    "PROVE"
+   ]
+  },
+  {
+   "id": "term.operator",
+   "type": "term",
+   "label": "operator",
+   "gloss": "The human owner whose attention is the bottleneck: sizes the work, sets the gates, owns the sign-offs. The agent does the work under those gates.",
+   "source": "methodology/core.md",
+   "aliases": []
+  },
+  {
+   "id": "term.constitution",
+   "type": "term",
+   "label": "Constitution",
+   "gloss": "The gate set a project commits to and enforces \u2014 its binding law, scaffolded as `.pdd/constitution.md`. Architectural commitments recorded alongside it are prose until a gate enforces them.",
+   "source": "methodology/core.md",
+   "aliases": []
+  },
+  {
+   "id": "term.gate-block---warn---off",
+   "type": "term",
+   "label": "gate (block / warn / off)",
+   "gloss": "A deterministic check with a real exit code, run in one of three committed modes: block (a red verdict fails the run), warn (surfaced, non-blocking), or off. Most start warn and earn block.",
+   "source": "README.md#the-gates-pdd",
+   "aliases": [
+    "gate mode",
+    "block",
+    "warn"
+   ]
+  },
+  {
+   "id": "term.language-pack",
+   "type": "term",
+   "label": "language pack",
+   "gloss": "A per-language gate implementation behind a JSON contract (TypeScript via ts-morph, Python via libcst), as opposed to the language-agnostic core text gates. Adding a language means implementing the contract.",
+   "source": "README.md#the-gates-pdd",
+   "aliases": []
+  },
+  {
+   "id": "term.flow",
+   "type": "term",
+   "label": "flow",
+   "gloss": "One per-language section of `.pdd/config.yaml` v2, with its own gates, source scope, test command, and mutation settings. One flow per language; execution currently runs only the first flow.",
+   "source": "docs/reference.md#config-pddconfigyaml",
+   "aliases": []
+  },
+  {
+   "id": "term.footgun",
+   "type": "term",
+   "label": "footgun",
+   "gloss": "A verified name-lie: a name, type, or signature that contradicts real runtime behavior, recorded with the misleading appearance, the verified reality, a file:line anchor, and a last-verified date.",
+   "source": "pdd/skills/footgun-register/SKILL.md",
+   "aliases": [
+    "name-lie",
+    "footgun register"
+   ]
+  },
+  {
+   "id": "term.system-truth-atlas",
+   "type": "term",
+   "label": "system-truth atlas",
+   "gloss": "The committed deliverable of MAP, in four parts: verified code map, footgun register, ranked risk register, silent-failure census. The recovered spec everything downstream reads from.",
+   "source": "pdd/skills/system-truth-atlas/SKILL.md",
+   "aliases": [
+    "atlas",
+    "System Truth Atlas"
+   ]
+  },
+  {
+   "id": "term.silent-failure",
+   "type": "term",
+   "label": "silent failure",
+   "gloss": "An error that leaves no trace \u2014 a swallowed exception, ignored failure return, unwatched task, unchecked subprocess exit \u2014 so a broken system still looks healthy. MAP censuses each site as real-risk or benign.",
+   "source": "pdd/skills/silent-failure-census/SKILL.md",
+   "aliases": [
+    "silent-failure census"
+   ]
+  },
+  {
+   "id": "term.sweep",
+   "type": "term",
+   "label": "sweep",
+   "gloss": "MAP's mechanical first stage: `check` (instant), then `prove` (seconds), then `grade` (only with `--grade`). Best-effort: a failed stage is recorded, not fatal, but the resulting problem list may be incomplete.",
+   "source": "docs/reference.md#pdd-map",
+   "aliases": [
+    "mechanical sweep"
+   ]
+  },
+  {
+   "id": "term.carve",
+   "type": "term",
+   "label": "carve",
+   "gloss": "PDD's CARVE move \u2014 split work into review-sized units, riskiest assumption proven first \u2014 and the MAP stage that carves findings into the risk-ranked `.pdd/units.json`, deterministic and byte-identical across hosts.",
+   "source": "README.md#the-five-moves",
+   "aliases": [
+    "CARVE"
+   ]
+  },
+  {
+   "id": "term.unit",
+   "type": "term",
+   "label": "unit",
+   "gloss": "One review-sized piece of the remediation roadmap: a carved group of findings carrying risk and size with an explanatory basis, its fingerprint set, and an id equal to its grade slug.",
+   "source": "docs/reference.md#unit-anatomy",
+   "aliases": [
+    "roadmap unit"
+   ]
+  },
+  {
+   "id": "term.attention-sized",
+   "type": "term",
+   "label": "attention-sized",
+   "gloss": "Work sized so planning takes about one minute of operator attention and reviewing completion about another; split on concerns, not lines of code or file count.",
+   "source": "pdd/skills/decompose-by-attention/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.finding-fingerprint",
+   "type": "term",
+   "label": "finding fingerprint",
+   "gloss": "A finding's stable identity: `<file>:<offset>:<kind>`, byte-precise so it survives line shifts; findings without a code offset carry a symbolic or line+hash fallback key.",
+   "source": "docs/reference.md#unit-anatomy",
+   "aliases": [
+    "fingerprint"
+   ]
+  },
+  {
+   "id": "term.riskscore",
+   "type": "term",
+   "label": "riskScore",
+   "gloss": "A unit's ranking: exposure \u00d7 (1 + 0.5\u00b7normFanIn + 0.5\u00b7covGap), where exposure sums kind-weighted findings and silent failures weigh high. Used when every unit has one; otherwise ordering falls back to risk tier.",
+   "source": "docs/reference.md#unit-anatomy",
+   "aliases": [
+    "exposure"
+   ]
+  },
+  {
+   "id": "term.gate-budget",
+   "type": "term",
+   "label": "gate budget",
+   "gloss": "The third sizing axis after unit-attention and PR-attention: a cap on a chunk's mutation cost in machine-minutes, estimated from a calibrated model and re-fit from actual runs; oversized groups split until they fit.",
+   "source": "docs/reference.md#the-gate-budget",
+   "aliases": []
+  },
+  {
+   "id": "term.roadmap",
+   "type": "term",
+   "label": "roadmap",
+   "gloss": "MAP's output: the risk-ranked list of units the operator triages at the curate gate and remediation works through \u2014 derived by replaying the ledger over the pristine `.pdd/units.json` baseline.",
+   "source": "docs/reference.md#pdd-roadmap--the-curate-gate",
+   "aliases": [
+    "unit roadmap"
+   ]
+  },
+  {
+   "id": "term.curate-gate",
+   "type": "term",
+   "label": "curate gate",
+   "gloss": "The human-in-the-loop pass (`pdd roadmap`) where the operator triages every carved unit \u2014 approve, deny, edit, move, split, refactor \u2014 over the append-only ledger before sign-off.",
+   "source": "docs/reference.md#pdd-roadmap--the-curate-gate",
+   "aliases": []
+  },
+  {
+   "id": "term.ledger",
+   "type": "term",
+   "label": "ledger",
+   "gloss": "The append-only record of every roadmap decision (`.pdd/roadmap-ledger.json`). The effective roadmap is derived by replaying it over the pristine carve baseline, so re-carving never clobbers a decision; history is never rewritten.",
+   "source": "docs/reference.md#pdd-roadmap--the-curate-gate",
+   "aliases": [
+    "roadmap ledger"
+   ]
+  },
+  {
+   "id": "term.sign-off",
+   "type": "term",
+   "label": "sign-off",
+   "gloss": "The ledger operation that freezes the curated roadmap and hands it to remediation. Requires every unit triaged (zero pending; denied counts too); any later operation reopens the roadmap.",
+   "source": "docs/reference.md#pdd-roadmap--the-curate-gate",
+   "aliases": [
+    "signoff"
+   ]
+  },
+  {
+   "id": "term.disposition",
+   "type": "term",
+   "label": "disposition",
+   "gloss": "The curate-gate decision each unit gets. Shipped today: approve, deny, or be consumed by a refactor; the fuller axis (repair in place, retire, accept) is designed, not yet built.",
+   "source": "methodology/core.md#refactor-obsolete-and-replace",
+   "aliases": []
+  },
+  {
+   "id": "term.refactor-object",
+   "type": "term",
+   "label": "refactor (object)",
+   "gloss": "A first-class ledger object that consumes one or more units and produces one mechanism under a decision-total keep/drop contract; consolidation, plain replace, and greenfield differ only in the consumed count.",
+   "source": "methodology/core.md#refactor-obsolete-and-replace",
+   "aliases": [
+    "obsolete-and-replace"
+   ]
+  },
+  {
+   "id": "term.decision-total",
+   "type": "term",
+   "label": "decision-total",
+   "gloss": "A contract property: every behavior of the consumed mechanisms is explicitly kept or dropped, and every affected call site migrated or shimmed; anything unassigned blocks the change.",
+   "source": "methodology/core.md#refactor-obsolete-and-replace",
+   "aliases": [
+    "keep/drop contract"
+   ]
+  },
+  {
+   "id": "term.blast-radius",
+   "type": "term",
+   "label": "blast radius",
+   "gloss": "A refactor's affected set: the call sites whose behavior must be preserved while their code changes, computed as a dependency-graph query. A lower bound \u2014 runtime resolution hides edges \u2014 and it picks atomic versus parallel cutover.",
+   "source": "methodology/core.md#refactor-obsolete-and-replace",
+   "aliases": [
+    "affects set",
+    "affected set"
+   ]
+  },
+  {
+   "id": "term.seam",
+   "type": "term",
+   "label": "seam",
+   "gloss": "An interface boundary you can substitute behind: where dependencies (clock, RNG, I/O) are injected, behavior is pinned, and a replacement mechanism is introduced. Where no seam exists, extract one first.",
+   "source": "methodology/core.md#refactor-obsolete-and-replace",
+   "aliases": []
+  },
+  {
+   "id": "term.characterization-test",
+   "type": "term",
+   "label": "characterization test",
+   "gloss": "A test capturing code's current behavior, written before any change, so a regression turns it red; the recovered spec. Held to the same adequacy bar as any other test.",
+   "source": "pdd/skills/characterize-before-change/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.reproducibility-baseline",
+   "type": "term",
+   "label": "reproducibility baseline",
+   "gloss": "A pre-change capture that can prove a change altered nothing: replay-and-diff when deterministic, else golden-master or injected seams for clock, RNG, and I/O. Making the system reproducible is itself a deliverable.",
+   "source": "pdd/skills/reproducibility-baseline/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.pin",
+   "type": "term",
+   "label": "pin",
+   "gloss": "To lock current behavior in a test that fails if it changes. Pinning values means asserting the exact returned value, not a type or truthiness, which a constant could satisfy.",
+   "source": "methodology/core.md#tests-that-constrain-behavior",
+   "aliases": [
+    "pin values",
+    "value-pinning"
+   ]
+  },
+  {
+   "id": "term.boundary-test",
+   "type": "term",
+   "label": "boundary test",
+   "gloss": "For any comparison against a limit, a test with the value at the limit itself, not only either side; the equality case is what pins `<` versus `<=`.",
+   "source": "methodology/core.md#tests-that-constrain-behavior",
+   "aliases": [
+    "boundary case"
+   ]
+  },
+  {
+   "id": "term.no-op-path",
+   "type": "term",
+   "label": "no-op path",
+   "gloss": "The branch where a conditional mutation's trigger is not met and post-state must equal pre-state. Every cleanup, eviction, expiry, or pruning method needs a test for it; re-implementors forget the guard.",
+   "source": "pdd/skills/no-op-paths/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.cover-the-mirror",
+   "type": "term",
+   "label": "cover-the-mirror",
+   "gloss": "The rule that an operation with a natural inverse implies the inverse exists (create/delete, acquire/release) or is marked absent-by-design; also the gate flagging a forward operation whose inverse is missing.",
+   "source": "pdd/skills/cover-the-mirror/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.property",
+   "type": "term",
+   "label": "property",
+   "gloss": "An invariant asserted over generated inputs covering the input's shape, not hand-picked examples \u2014 sourced from the data's schema or the design, never from reading the implementation.",
+   "source": "pdd/skills/properties/SKILL.md",
+   "aliases": [
+    "property test"
+   ]
+  },
+  {
+   "id": "term.mutant",
+   "type": "term",
+   "label": "mutant",
+   "gloss": "A small bug deliberately injected into the code \u2014 a flipped comparison, a deleted branch, a constant return \u2014 to check whether any test fails.",
+   "source": "pdd/skills/mutation-grading/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.surviving-mutant",
+   "type": "term",
+   "label": "surviving mutant",
+   "gloss": "An injected bug no test catches. Each survivor is either a weak test (add a case or property) or dead code (delete it); read it before trusting the count.",
+   "source": "pdd/skills/mutation-grading/SKILL.md",
+   "aliases": [
+    "survivor"
+   ]
+  },
+  {
+   "id": "term.mutation-grading",
+   "type": "term",
+   "label": "mutation grading",
+   "gloss": "Grading whether a suite actually bites by injecting many small bugs and checking the tests catch them; in the CLI, `pdd grade` \u2014 a broad diagnostic that never fails the build, cached per unit.",
+   "source": "pdd/skills/mutation-grading/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.false-covered-boundary",
+   "type": "term",
+   "label": "false-covered boundary",
+   "gloss": "A threshold constant that tests reference but never pin: `pdd prove` flips its comparison operator, runs those tests, and nothing fails \u2014 the equality limit was never actually checked.",
+   "source": "docs/reference.md#pdd-prove-vs-pdd-grade",
+   "aliases": [
+    "false-covered"
+   ]
+  },
+  {
+   "id": "term.walking-skeleton",
+   "type": "term",
+   "label": "walking skeleton",
+   "gloss": "A thin end-to-end spike exercising the real thing \u2014 real call, real data, real concurrency, not a mock \u2014 run to prove a plan's riskiest assumption before anything is built on it.",
+   "source": "pdd/skills/derisk-gate/SKILL.md",
+   "aliases": [
+    "thin end-to-end spike"
+   ]
+  },
+  {
+   "id": "term.derisk-gate",
+   "type": "term",
+   "label": "derisk gate",
+   "gloss": "A CARVE gate: before decomposing work, prove the riskiest architectural assumptions with a walking skeleton and emit a ranked risk register and a GREEN/RED/OVERRIDE verdict; skips must be explicit, never silent.",
+   "source": "pdd/skills/derisk-gate/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.decision-gate",
+   "type": "term",
+   "label": "decision gate",
+   "gloss": "A gate on a decision you can't cheaply walk back: name the observable kill-condition that would prove it wrong, wire a detector, and size the proof to the cost of being wrong.",
+   "source": "pdd/skills/decision-gate/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.kill-condition",
+   "type": "term",
+   "label": "kill-condition",
+   "gloss": "The observable condition that would prove a decision wrong, named before anything is built on the decision, with a detector watching for it. A decision without one reads the same right or wrong.",
+   "source": "pdd/skills/decision-gate/SKILL.md",
+   "aliases": []
+  },
+  {
+   "id": "term.classify",
+   "type": "term",
+   "label": "classify",
+   "gloss": "The MAP step that triages findings by verdict. Only high/medium-severity findings ever spend tokens, and a dropping verdict (`equivalent`/`benign`) requires a rationale before the validated merge accepts it.",
+   "source": "docs/reference.md#pdd-map",
+   "aliases": [
+    "verdict",
+    "dropping verdict"
+   ]
+  },
+  {
+   "id": "term.model-b---write-boundary",
+   "type": "term",
+   "label": "Model B / write boundary",
+   "gloss": "The agent contract: the session authors content (atlas fragments, verdicts, fixes); the CLI alone validates and writes. Nothing model-authored becomes `.pdd/` state unvalidated, save two audit/cache artifacts.",
+   "source": "docs/reference.md#agent-seams-how-a-session-drives-pdd",
+   "aliases": [
+    "Model B",
+    "validated write boundary"
+   ]
+  },
+  {
+   "id": "term.remediation",
+   "type": "term",
+   "label": "remediation",
+   "gloss": "The post-sign-off loop that fixes approved units in isolated worktrees under the same gates, one commit per unit on the `pdd/remediate` branch. `committed` means awaiting your merge, not resolved.",
+   "source": "docs/reference.md#pdd-remediate",
+   "aliases": [
+    "remediate loop",
+    "pdd remediate"
+   ]
+  },
+  {
+   "id": "term.worktree-sandbox",
+   "type": "term",
+   "label": "worktree sandbox",
+   "gloss": "A detached git worktree where mutation runs or remediation fixes execute in isolation, so the operator's working tree is never touched; a sandbox that fails its baseline re-runs sequentially in place.",
+   "source": "docs/reference.md#pdd-prove-vs-pdd-grade",
+   "aliases": [
+    "detached worktree"
+   ]
+  },
+  {
+   "id": "term.needs-hitl",
+   "type": "term",
+   "label": "needs-hitl",
+   "gloss": "A remediation unit parked for the human: the fix touched files outside the unit's scope, the post-fix suite regressed, or its findings aren't check-class so the re-sweep gate can't certify them.",
+   "source": "docs/reference.md#pdd-remediate",
+   "aliases": []
+  },
+  {
+   "id": "term.re-sweep-gate",
+   "type": "term",
+   "label": "re-sweep gate",
+   "gloss": "The remediation certification step: `pdd check` re-run inside the worktree against post-fix code. Today it certifies check-class findings only; prove/grade/atlas-class findings park at needs-hitl by design.",
+   "source": "docs/reference.md#pdd-remediate",
+   "aliases": []
+  },
+  {
+   "id": "term.re-map-to-reconcile",
+   "type": "term",
+   "label": "re-map to reconcile",
+   "gloss": "How resolution is detected after you merge remediation commits: re-run `pdd map` \u2014 the finding clears, the re-carve drops the unit, and its status row is pruned. Never by polling git.",
+   "source": "docs/reference.md#pdd-remediate",
+   "aliases": [
+    "reconcile"
+   ]
+  },
+  {
+   "id": "explorer.foundation.thesis",
+   "type": "source",
+   "label": "Foundation",
+   "target": "https://alextavor.github.io/pdd/#flow/foundation.thesis",
+   "nodeType": "foundation",
+   "hasBody": true,
+   "summary": "Implementation is cheap; expert attention is the bottleneck. The acceptance set is the spec, not just its validation."
+  },
+  {
+   "id": "explorer.verb.map",
+   "type": "source",
+   "label": "MAP",
+   "target": "https://alextavor.github.io/pdd/#flow/verb.map",
+   "nodeType": "verb",
+   "hasBody": true,
+   "summary": "Recover ground truth \u2014 read the system; the names lie."
+  },
+  {
+   "id": "explorer.verb.pin",
+   "type": "source",
+   "label": "PIN",
+   "target": "https://alextavor.github.io/pdd/#flow/verb.pin",
+   "nodeType": "verb",
+   "hasBody": true,
+   "summary": "Lock current behavior before changing it."
+  },
+  {
+   "id": "explorer.verb.carve",
+   "type": "source",
+   "label": "CARVE",
+   "target": "https://alextavor.github.io/pdd/#flow/verb.carve",
+   "nodeType": "verb",
+   "hasBody": true,
+   "summary": "Cut work into attention-sized, de-risked units."
+  },
+  {
+   "id": "explorer.verb.ship",
+   "type": "source",
+   "label": "SHIP",
+   "target": "https://alextavor.github.io/pdd/#flow/verb.ship",
+   "nodeType": "verb",
+   "hasBody": true,
+   "summary": "Make each change under mechanical gates."
+  },
+  {
+   "id": "explorer.verb.prove",
+   "type": "source",
+   "label": "PROVE",
+   "target": "https://alextavor.github.io/pdd/#flow/verb.prove",
+   "nodeType": "verb",
+   "hasBody": true,
+   "summary": "Show behavior preserved and debt burned down."
+  },
+  {
+   "id": "explorer.pillar.constitution",
+   "type": "source",
+   "label": "Project rules",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/pillar.constitution",
+   "nodeType": "pillar",
+   "hasBody": true,
+   "summary": "Rules the project commits to and enforces."
+  },
+  {
+   "id": "explorer.pillar.trustworthy-green",
+   "type": "source",
+   "label": "Trustworthy tests",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/pillar.trustworthy-green",
+   "nodeType": "pillar",
+   "hasBody": true,
+   "summary": "A passing suite only means something if the tests would fail when the behavior is wrong and no error can hide."
+  },
+  {
+   "id": "explorer.pillar.behavior-lock",
+   "type": "source",
+   "label": "Behavior truth & preservation",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/pillar.behavior-lock",
+   "nodeType": "pillar",
+   "hasBody": true,
+   "summary": "Recover what the code actually does, then prove a change didn't alter it."
+  },
+  {
+   "id": "explorer.family.constitution-rules",
+   "type": "source",
+   "label": "Tool discipline",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.constitution-rules",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Run the checker instead of guessing; resolve rule deadlocks deliberately."
+  },
+  {
+   "id": "explorer.family.adequacy",
+   "type": "source",
+   "label": "Tests that constrain behavior",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.adequacy",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Does the test actually pin behavior?"
+  },
+  {
+   "id": "explorer.family.nsf",
+   "type": "source",
+   "label": "Keep failures visible",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.nsf",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Can any error hide?"
+  },
+  {
+   "id": "explorer.family.properties",
+   "type": "source",
+   "label": "Properties",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.properties",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Generate inputs and assert invariants instead of listing example cases."
+  },
+  {
+   "id": "explorer.family.grade",
+   "type": "source",
+   "label": "Mutation grading",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.grade",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Inject bugs and check the tests catch them."
+  },
+  {
+   "id": "explorer.family.guard",
+   "type": "source",
+   "label": "Keeping properties honest",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.guard",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Keep properties honest: sourced from design, not the code."
+  },
+  {
+   "id": "explorer.family.map-recovery",
+   "type": "source",
+   "label": "Recover system truth",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.map-recovery",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Read the code (names lie), register the footguns, census the silent failures, assemble the atlas."
+  },
+  {
+   "id": "explorer.family.behavior-lock-rules",
+   "type": "source",
+   "label": "Lock and prove behavior",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.behavior-lock-rules",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "Characterize, reproduce, prove-no-drift."
+  },
+  {
+   "id": "explorer.family.verb-skills",
+   "type": "source",
+   "label": "Working procedures",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.verb-skills",
+   "nodeType": "family",
+   "hasBody": true,
+   "summary": "How to run the work: sizing, de-risking, root-causing, reporting."
+  },
+  {
+   "id": "explorer.rule.c1",
+   "type": "source",
+   "label": "Tools authoritative",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.c1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Run the checker; never estimate compliance by reading code."
+  },
+  {
+   "id": "explorer.rule.c2",
+   "type": "source",
+   "label": "Deadlock protocol",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.c2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "If fixing A re-breaks B, suppress the tool heuristic (not a human constraint), logged."
+  },
+  {
+   "id": "explorer.rule.a1",
+   "type": "source",
+   "label": "Boundary",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "For every x op limit, test x == limit."
+  },
+  {
+   "id": "explorer.rule.a2",
+   "type": "source",
+   "label": "No-op branch",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Test the not-triggered branch of conditional mutations."
+  },
+  {
+   "id": "explorer.rule.a3",
+   "type": "source",
+   "label": "Lifecycle & composition",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Post-close behavior, no ignored params, shared-resource ownership."
+  },
+  {
+   "id": "explorer.rule.a4",
+   "type": "source",
+   "label": "Value-pinning",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a4",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Assert enum/string outputs by value; every member reachable."
+  },
+  {
+   "id": "explorer.rule.a5",
+   "type": "source",
+   "label": "Invariant-exercisability",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a5",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Claim an invariant only if the test exercises it."
+  },
+  {
+   "id": "explorer.rule.a6",
+   "type": "source",
+   "label": "Contract adequacy",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a6",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Verdict-over-structured-input needs a property + satisfiability + oracle, not examples."
+  },
+  {
+   "id": "explorer.rule.a7",
+   "type": "source",
+   "label": "Negatives & edges",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a7",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Golden + each declared failure mode + each documented edge; no golden-only."
+  },
+  {
+   "id": "explorer.rule.a8",
+   "type": "source",
+   "label": "Mocking discipline",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a8",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Mock only external boundaries; minimal per-case stubs."
+  },
+  {
+   "id": "explorer.rule.a9",
+   "type": "source",
+   "label": "Requirement traceability",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.a9",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Every stated requirement maps to at least one test via a mechanically checkable id; an untraced requirement is unverifie"
+  },
+  {
+   "id": "explorer.rule.n1",
+   "type": "source",
+   "label": "Handle or propagate",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "No silent third outcome; an observable trace or it flows to a boundary."
+  },
+  {
+   "id": "explorer.rule.n2",
+   "type": "source",
+   "label": "No blanket catches",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Name the exception; broad catch only at a boundary that surfaces it."
+  },
+  {
+   "id": "explorer.rule.n3",
+   "type": "source",
+   "label": "No swallowed handled",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A caught error's resolution must be observable."
+  },
+  {
+   "id": "explorer.rule.n4",
+   "type": "source",
+   "label": "No orphan async",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n4",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Every spawned task has a completion observer."
+  },
+  {
+   "id": "explorer.rule.n5",
+   "type": "source",
+   "label": "Check subprocess results",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n5",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Exit code + stderr surfaced on failure."
+  },
+  {
+   "id": "explorer.rule.n6",
+   "type": "source",
+   "label": "Tests must not mask defects",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.n6",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "No pattern that turns a framework/import failure into a test pass."
+  },
+  {
+   "id": "explorer.rule.p1",
+   "type": "source",
+   "label": "Properties over examples",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.p1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Where behavior ranges over a structured domain, assert invariants via generators."
+  },
+  {
+   "id": "explorer.rule.p2",
+   "type": "source",
+   "label": "Two sources",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.p2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Schema-derived shape properties + design-derived behavior invariants."
+  },
+  {
+   "id": "explorer.rule.g1",
+   "type": "source",
+   "label": "Mutation grades the suite",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.g1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A test/property that kills no mutant is too weak \u2014 fix the test, not the threshold."
+  },
+  {
+   "id": "explorer.rule.g2",
+   "type": "source",
+   "label": "Triage survivors",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.g2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A surviving mutant is a weak test (fix it) or dead code (delete it) \u2014 read it before blaming the count."
+  },
+  {
+   "id": "explorer.rule.gd1",
+   "type": "source",
+   "label": "Provenance",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.gd1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Properties cite a design source; never authored from the impl (it just restates the code)."
+  },
+  {
+   "id": "explorer.rule.gd2",
+   "type": "source",
+   "label": "Adversarial refutation",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.gd2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A 2nd agent writes a wrong impl that still passes \u2014 a survivor reveals a missing property."
+  },
+  {
+   "id": "explorer.rule.gd3",
+   "type": "source",
+   "label": "Halt-and-triage",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.gd3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A counterexample halts; classify bug/wrong-property/spec-gap; never auto-relax."
+  },
+  {
+   "id": "explorer.rule.b1",
+   "type": "source",
+   "label": "Characterize before change",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.b1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Lock current behavior first; the recovered tests are the spec."
+  },
+  {
+   "id": "explorer.rule.b2",
+   "type": "source",
+   "label": "Reproducibility by type",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.b2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Replay if deterministic; else golden-master/snapshot/seam-injection."
+  },
+  {
+   "id": "explorer.rule.b3",
+   "type": "source",
+   "label": "Adequacy on characterization",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.b3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Adequacy gates apply to characterization tests too."
+  },
+  {
+   "id": "explorer.rule.m1",
+   "type": "source",
+   "label": "Footgun register",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.m1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Record every name-vs-behavior contradiction with a file:line anchor and a date."
+  },
+  {
+   "id": "explorer.rule.m2",
+   "type": "source",
+   "label": "Silent-failure census",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.m2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Sweep every site an error can be lost; classify each real-risk vs benign by reading it."
+  },
+  {
+   "id": "explorer.rule.m3",
+   "type": "source",
+   "label": "System Truth Atlas",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.m3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Assemble the dated, anchored MAP deliverable: code map + footgun register + risk register + census."
+  },
+  {
+   "id": "explorer.rule.v1",
+   "type": "source",
+   "label": "Read the system",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v1",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Names lie \u2192 recover ground truth \u2192 footgun atlas."
+  },
+  {
+   "id": "explorer.rule.v2",
+   "type": "source",
+   "label": "Attention-sizing",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v2",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "~1 min plan + ~1 min review; carve on concerns, not lines/files."
+  },
+  {
+   "id": "explorer.rule.v3",
+   "type": "source",
+   "label": "De-risk gate",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v3",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Walking-skeleton the riskiest assumption before committing the plan."
+  },
+  {
+   "id": "explorer.rule.v4",
+   "type": "source",
+   "label": "PR-sizing",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v4",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Size to the operator's milestone; two no-engagement lgtm's = wrong unit."
+  },
+  {
+   "id": "explorer.rule.v5",
+   "type": "source",
+   "label": "Root-cause over symptom",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v5",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "\u22653 divergent symptoms \u21d2 audit upstream, name one cause, land a catcher."
+  },
+  {
+   "id": "explorer.rule.v6",
+   "type": "source",
+   "label": "Cheap checks gate expensive",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v6",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Run the full $0 deterministic suite before any costly/irreversible step."
+  },
+  {
+   "id": "explorer.rule.v7",
+   "type": "source",
+   "label": "Report decisions",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v7",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Surface judgment calls, tradeoffs, suppressions \u2014 not a recap of actions."
+  },
+  {
+   "id": "explorer.rule.v8",
+   "type": "source",
+   "label": "Decision gate",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v8",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Gate a critical decision on a falsifiable disproof condition, a detector, and proof proportionate to how much could brea"
+  },
+  {
+   "id": "explorer.rule.v9",
+   "type": "source",
+   "label": "Design-assumptions register",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v9",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Surface the critical assumptions a design rests on; each gets a 'breaks if' falsifier, a consequence-anchored fragility,"
+  },
+  {
+   "id": "explorer.rule.v10",
+   "type": "source",
+   "label": "One meaning per term",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v10",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "A critical spec term carries one meaning; a term with two clear meanings (ambiguity, not vagueness) splits readers silen"
+  },
+  {
+   "id": "explorer.rule.v11",
+   "type": "source",
+   "label": "Cover the mirror",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v11",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Every operation with a natural inverse implies its inverse; a present half whose mirror is silently missing (create with"
+  },
+  {
+   "id": "explorer.rule.v12",
+   "type": "source",
+   "label": "Design completeness",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.v12",
+   "nodeType": "rule",
+   "hasBody": true,
+   "summary": "Before code, each behaviour names its contract, its failure modes, and its edges; a present-but-empty (TBD) section coun"
+  },
+  {
+   "id": "explorer.deliv.truth-atlas",
+   "type": "source",
+   "label": "System Truth Atlas",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.truth-atlas",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Code map + footgun register + risk register + silent-failure census."
+  },
+  {
+   "id": "explorer.deliv.silent-failure-census",
+   "type": "source",
+   "label": "Silent-failure census",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.silent-failure-census",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Every place the system can fail without telling you."
+  },
+  {
+   "id": "explorer.deliv.characterization-suite",
+   "type": "source",
+   "label": "Characterization suite",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.characterization-suite",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Tests that lock current behavior."
+  },
+  {
+   "id": "explorer.deliv.determinism-baseline",
+   "type": "source",
+   "label": "Reproducibility baseline",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.determinism-baseline",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "The behavior-lock baseline (replay/golden-master)."
+  },
+  {
+   "id": "explorer.deliv.change-plan",
+   "type": "source",
+   "label": "Change plan",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.change-plan",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Attention-sized PR plan."
+  },
+  {
+   "id": "explorer.deliv.walking-skeleton",
+   "type": "source",
+   "label": "Walking skeleton",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.walking-skeleton",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Riskiest-assumption spike."
+  },
+  {
+   "id": "explorer.deliv.gated-prs",
+   "type": "source",
+   "label": "Gated PRs",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.gated-prs",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Changes shipped under mechanical gates."
+  },
+  {
+   "id": "explorer.deliv.replay-proof",
+   "type": "source",
+   "label": "Behavior-preservation proof",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.replay-proof",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Before/after evidence behavior didn't drift."
+  },
+  {
+   "id": "explorer.deliv.burn-down",
+   "type": "source",
+   "label": "Remediation burn-down",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.burn-down",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Debt \u2192 0 under gates."
+  },
+  {
+   "id": "explorer.deliv.constitution-file",
+   "type": "source",
+   "label": "Go-forward Constitution",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.constitution-file",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "Rules the project commits to and enforces."
+  },
+  {
+   "id": "explorer.actor.operator",
+   "type": "source",
+   "label": "Operator",
+   "target": "https://alextavor.github.io/pdd/#application/actor.operator",
+   "nodeType": "actor",
+   "hasBody": true,
+   "summary": "Human owner; owns sign-off gates."
+  },
+  {
+   "id": "explorer.actor.builder",
+   "type": "source",
+   "label": "Builder",
+   "target": "https://alextavor.github.io/pdd/#application/actor.builder",
+   "nodeType": "actor",
+   "hasBody": true,
+   "summary": "Strong-model agent; does the work."
+  },
+  {
+   "id": "explorer.actor.auditor",
+   "type": "source",
+   "label": "Auditor",
+   "target": "https://alextavor.github.io/pdd/#application/actor.auditor",
+   "nodeType": "actor",
+   "hasBody": true,
+   "summary": "Agent + CI; verifies independently."
+  },
+  {
+   "id": "explorer.failure.adequacy-gap",
+   "type": "source",
+   "label": "Adequacy gap",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.adequacy-gap",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "Tests pass but don't pin behavior."
+  },
+  {
+   "id": "explorer.failure.visibility-gap",
+   "type": "source",
+   "label": "Visibility gap",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.visibility-gap",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "Code runs but errors hid."
+  },
+  {
+   "id": "explorer.failure.behavior-drift",
+   "type": "source",
+   "label": "Behavior drift",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.behavior-drift",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "A change silently altered behavior."
+  },
+  {
+   "id": "explorer.failure.tautological-property",
+   "type": "source",
+   "label": "Property that restates the code",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.tautological-property",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "A property mirrors buggy code \u2014 mutation can't see it."
+  },
+  {
+   "id": "explorer.failure.architectural-risk",
+   "type": "source",
+   "label": "Architectural risk",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.architectural-risk",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "A critical assumption proves wrong after commitment."
+  },
+  {
+   "id": "explorer.failure.untrusted-truth",
+   "type": "source",
+   "label": "Untrustworthy ground truth",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.untrusted-truth",
+   "nodeType": "failure",
+   "hasBody": true,
+   "summary": "Names, types, and docs contradict what the code does \u2014 every claim is a guess."
+  },
+  {
+   "id": "explorer.family.refactor",
+   "type": "source",
+   "label": "Phase-2 refactor (obsolete-and-replace)",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/family.refactor",
+   "nodeType": "family",
+   "hasBody": false,
+   "summary": "When a mechanism is the defect, obsolete and replace it under the same proof discipline: disposition, a computed blast r"
+  },
+  {
+   "id": "explorer.rule.rf1",
+   "type": "source",
+   "label": "Disposition at the gate",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf1",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "The operator assigns each unit a disposition: repair, retire, accept, or consumed-by-a-refactor. Replace is a pointer to"
+  },
+  {
+   "id": "explorer.rule.rf2",
+   "type": "source",
+   "label": "Refactor is first-class",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf2",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "A refactor consumes a set of units and produces one mechanism; cardinality unifies consolidation (N), plain replace (1),"
+  },
+  {
+   "id": "explorer.rule.rf3",
+   "type": "source",
+   "label": "Consumes / produces / affects",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf3",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Three edges: the consumed units (retired at cutover), the produced mechanism, and the affected units whose behavior is p"
+  },
+  {
+   "id": "explorer.rule.rf4",
+   "type": "source",
+   "label": "Decision-total contract",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf4",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Keep/drop over consumed behavior plus a preserve-set over affected behavior; every behavior assigned and every call site"
+  },
+  {
+   "id": "explorer.rule.rf5",
+   "type": "source",
+   "label": "Blast radius drives cutover",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf5",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Blast radius is computed from the dependency graph (a lower bound, since runtime resolution hides edges) and chooses ato"
+  },
+  {
+   "id": "explorer.rule.rf6",
+   "type": "source",
+   "label": "Pin is a precondition",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf6",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Pinning precedes a refactor and is demand-driven by its footprint; affected units the blast radius reaches become pin de"
+  },
+  {
+   "id": "explorer.rule.rf7",
+   "type": "source",
+   "label": "Surface-scoped pin",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf7",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Pin state is per-interface, sound only where the surface is a true cut, else widen. The same typed interface is the stru"
+  },
+  {
+   "id": "explorer.rule.rf8",
+   "type": "source",
+   "label": "Flag runtime resolution, not DI",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf8",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Interface-based dependency injection keeps the blast radius static; service locators, reflection, string registries, and"
+  },
+  {
+   "id": "explorer.rule.rf9",
+   "type": "source",
+   "label": "Extract the seam first",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf9",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Where no boundary exists, a coarse baseline then a behavior-preserving extraction (verified a true cut) precedes the rep"
+  },
+  {
+   "id": "explorer.rule.rf10",
+   "type": "source",
+   "label": "One typed graph; views are projections",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf10",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Blast radius and the precondition DAG are filtered projections over one typed graph; the roadmap list stays primary, the"
+  },
+  {
+   "id": "explorer.rule.rf11",
+   "type": "source",
+   "label": "Seam placement is a decision-gate",
+   "target": "https://alextavor.github.io/pdd/#taxonomy/rule.rf11",
+   "nodeType": "rule",
+   "hasBody": false,
+   "summary": "Placement runs on a provisional seam with a walking-skeleton proof; the kill-condition is the downstream contract failin"
+  },
+  {
+   "id": "explorer.deliv.refactor-draft",
+   "type": "source",
+   "label": "Refactor draft",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.refactor-draft",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "A non-destructive, replayable ledger overlay: the consumed set, the produced mechanism, the contract, and a gated status"
+  },
+  {
+   "id": "explorer.deliv.keep-drop-contract",
+   "type": "source",
+   "label": "Keep/drop contract",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.keep-drop-contract",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "The decision-total partition of consumed behavior plus the preserve-set over affected behavior."
+  },
+  {
+   "id": "explorer.deliv.blast-radius",
+   "type": "source",
+   "label": "Blast radius",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.blast-radius",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "The computed set of dependents of a seam, with opaque runtime-resolution sites flagged as a lower-bound caveat."
+  },
+  {
+   "id": "explorer.deliv.extracted-seam",
+   "type": "source",
+   "label": "Extracted seam",
+   "target": "https://alextavor.github.io/pdd/#application/deliv.extracted-seam",
+   "nodeType": "deliverable",
+   "hasBody": false,
+   "summary": "An interface introduced where none existed, verified a true cut, with its characterization (a reusable asset)."
+  },
+  {
+   "id": "explorer.failure.rewrite-and-pray",
+   "type": "source",
+   "label": "Rewrite-and-pray",
+   "target": "https://alextavor.github.io/pdd/#threat/failure.rewrite-and-pray",
+   "nodeType": "failure",
+   "hasBody": false,
+   "summary": "Obsoleting a mechanism and shipping the replacement without preserving the behavior that was correct: the escape hatch f"
+  },
+  {
+   "id": "doc-reference-pdd-map",
+   "type": "source",
+   "label": "reference.md#pdd-map",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-map",
+   "oneLine": "The full MAP command: cost-ordered sweep \u2192 atlas \u2192 classify \u2192 carve, subsystem ranking formula, providers, atlas cache, and the validated write boundary.",
+   "chapter": "map"
+  },
+  {
+   "id": "doc-reference-pdd-roadmap-curate-gate",
+   "type": "source",
+   "label": "reference.md#pdd-roadmap--the-curate-gate",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-roadmap--the-curate-gate",
+   "oneLine": "The curate-gate CLI: append-only ledger replayed over the pristine carve, approve/deny/edit/move/split/refactor/undo, and sign-off as the Phase-1 \u2192 Phase-2 handoff.",
+   "chapter": "gate"
+  },
+  {
+   "id": "doc-reference-unit-anatomy",
+   "type": "source",
+   "label": "reference.md#unit-anatomy",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#unit-anatomy",
+   "oneLine": "What one carved unit carries: finding fingerprints, risk/size with explanatory basis, the riskScore formula, and byte-identical determinism across hosts.",
+   "chapter": "carve"
+  },
+  {
+   "id": "doc-reference-pdd-remediate",
+   "type": "source",
+   "label": "reference.md#pdd-remediate",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-remediate",
+   "oneLine": "The per-unit fix loop: detached worktree, characterization guard, scope check, re-sweep gate, and the one-branch one-commit-per-unit provenance contract.",
+   "chapter": "remediate"
+  },
+  {
+   "id": "doc-reference-pdd-check-and-the-gates",
+   "type": "source",
+   "label": "reference.md#pdd-check-and-the-gates",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-check-and-the-gates",
+   "oneLine": "The nine mechanical gates, their default block/warn modes per flow, exit-code semantics, and the boundary-tests-is-a-proxy caveat.",
+   "chapter": "gate"
+  },
+  {
+   "id": "doc-reference-config-pdd-config-yaml",
+   "type": "source",
+   "label": "reference.md#config-pddconfigyaml",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#config-pddconfigyaml",
+   "oneLine": "The v2 flows-list config: one flow per language with its own paths, gates, testCommand and mutation settings, plus the single-flow execution caveat.",
+   "chapter": "general"
+  },
+  {
+   "id": "doc-reference-pdd-init",
+   "type": "source",
+   "label": "reference.md#pdd-init",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-init",
+   "oneLine": "What init scaffolds idempotently: config.yaml per detected language, constitution.md as committed law, and a pre-commit hook running pdd check --staged.",
+   "chapter": "general"
+  },
+  {
+   "id": "doc-reference-pdd-prove-vs-pdd-grade",
+   "type": "source",
+   "label": "reference.md#pdd-prove-vs-pdd-grade",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#pdd-prove-vs-pdd-grade",
+   "oneLine": "The two mutation commands kept distinct: prove is the targeted boundary oracle that can fail the build, grade is broad diagnostic mutation with nine operators and a per-unit cache.",
+   "chapter": "prove"
+  },
+  {
+   "id": "doc-reference-the-gate-budget",
+   "type": "source",
+   "label": "reference.md#the-gate-budget",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#the-gate-budget",
+   "oneLine": "The third sizing axis (mutation cost): the estimate formula, the durable calibration ledger, the budget-aware carve split, and warn-first enforcement.",
+   "chapter": "carve"
+  },
+  {
+   "id": "doc-reference-dashboards",
+   "type": "source",
+   "label": "reference.md#dashboards",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#dashboards",
+   "oneLine": "The three loopback-only servers (dashboard 4317, plan 4318, gallery 4319) and the shared posture that viewers never write .pdd/ except by spawning the CLI.",
+   "chapter": "general"
+  },
+  {
+   "id": "doc-reference-the-pdd-directory",
+   "type": "source",
+   "label": "reference.md#the-pdd-directory",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#the-pdd-directory",
+   "oneLine": "Which .pdd/ artifacts are committed vs runtime, the sole-writer-per-artifact table, and the atomic-write guarantee against torn state.",
+   "chapter": "general"
+  },
+  {
+   "id": "doc-reference-agent-seams",
+   "type": "source",
+   "label": "reference.md#agent-seams-how-a-session-drives-pdd",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/docs/reference.md#agent-seams-how-a-session-drives-pdd",
+   "oneLine": "The Model B contract \u2014 the session authors, the CLI validates and writes \u2014 via worklist \u2192 ingest/classify, with the same posture on remediation and dashboards.",
+   "chapter": "general"
+  },
+  {
+   "id": "doc-core-recover-and-lock-behavior",
+   "type": "source",
+   "label": "core.md#recover-and-lock-behavior",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#recover-and-lock-behavior",
+   "oneLine": "The MAP/PIN rules: read the system not the names, record footguns, census silent failures, assemble the atlas, then characterize and make behavior reproducible before change.",
+   "chapter": "map"
+  },
+  {
+   "id": "doc-core-tests-that-constrain-behavior",
+   "type": "source",
+   "label": "core.md#tests-that-constrain-behavior",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#tests-that-constrain-behavior",
+   "oneLine": "The adequacy rules a test must meet to constrain anything: boundary, no-op path, value pinning, whole-domain properties, edge coverage, requirement tracing, mock-only-edges.",
+   "chapter": "pin"
+  },
+  {
+   "id": "doc-core-keep-failures-visible",
+   "type": "source",
+   "label": "core.md#keep-failures-visible",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#keep-failures-visible",
+   "oneLine": "The no-silent-failure rules: handle-or-propagate with a visible trace, named catches, no fire-and-forget, checked subprocess exits, tests that can't hide a broken build.",
+   "chapter": "failure"
+  },
+  {
+   "id": "doc-core-grading-the-tests-themselves",
+   "type": "source",
+   "label": "core.md#grading-the-tests-themselves",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#grading-the-tests-themselves",
+   "oneLine": "The layer that checks the suite as a whole bites: properties from schema and design, mutation grading with the weak-test-vs-dead-code read, beat-the-properties, stop on counterexamples.",
+   "chapter": "prove"
+  },
+  {
+   "id": "doc-core-working-procedures",
+   "type": "source",
+   "label": "core.md#working-procedures",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#working-procedures",
+   "oneLine": "How to run the work: size to attention and to the gate budget, derisk and decision-gate before committing, register assumptions, one meaning per term, size PRs to the operator, report decisions.",
+   "chapter": "carve"
+  },
+  {
+   "id": "doc-core-refactor-obsolete-and-replace",
+   "type": "source",
+   "label": "core.md#refactor-obsolete-and-replace",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/methodology/core.md#refactor-obsolete-and-replace",
+   "oneLine": "The rules that keep replace-not-repair honest: disposition at the gate, one refactor object with three edges, decision-total keep/drop, computed blast radius, pin before replace.",
+   "chapter": "remediate"
+  },
+  {
+   "id": "skill-assert-by-shape",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/assert-by-shape/SKILL.md",
+   "oneLine": "assert-by-shape \u2014 a test returning a structured value compares the whole fixture in one deep-equality assertion, not a column of per-field pokes.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-boundary-tests",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/boundary-tests/SKILL.md",
+   "oneLine": "boundary-tests \u2014 any comparison against a limit must have a test case at the boundary itself, not only values to either side.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-characterize-before-change",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/characterize-before-change/SKILL.md",
+   "oneLine": "characterize-before-change \u2014 pin untrusted code's current behavior in adequacy-grade tests before touching it, so the tests become the recovered spec.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-cohesion-review",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/cohesion-review/SKILL.md",
+   "oneLine": "cohesion-review \u2014 when a change grows an existing module, review the whole resulting module for semantic duplication and responsibility drift, not just the diff.",
+   "chapter": "ship"
+  },
+  {
+   "id": "skill-cover-the-mirror",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/cover-the-mirror/SKILL.md",
+   "oneLine": "cover-the-mirror \u2014 every operation with a natural inverse (create/delete, acquire/release) must have its other half present or explicitly marked absent-by-design.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-decision-gate",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/decision-gate/SKILL.md",
+   "oneLine": "decision-gate \u2014 gate a hard-to-reverse decision with an observable kill-condition, a detector, and proof sized to blast radius, ending in GREEN / RED / OVERRIDE.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-decompose-by-attention",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/decompose-by-attention/SKILL.md",
+   "oneLine": "decompose-by-attention \u2014 carve work into attention-sized pieces of roughly one minute of operator planning plus one minute of review.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-derisk-gate",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/derisk-gate/SKILL.md",
+   "oneLine": "derisk-gate \u2014 before committing a plan, prove the riskiest architectural assumptions with a thin end-to-end walking skeleton and a ranked risk register.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-design-assumptions-register",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/design-assumptions-register/SKILL.md",
+   "oneLine": "design-assumptions-register \u2014 surface the never-consciously-chosen assumptions a plan rests on and record each with a falsifying condition, fragility, and detector.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-design-completeness",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/design-completeness/SKILL.md",
+   "oneLine": "design-completeness \u2014 a design must name each behavior's contract, failure modes, and edges before code; a TBD section is a gap wearing the costume of completeness.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-footgun-register",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/footgun-register/SKILL.md",
+   "oneLine": "footgun-register \u2014 when a name, type, or signature contradicts real runtime behavior, record appearance, verified reality, file:line anchor, and date in a committed register.",
+   "chapter": "map"
+  },
+  {
+   "id": "skill-keep-properties-honest",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/keep-properties-honest/SKILL.md",
+   "oneLine": "keep-properties-honest \u2014 guard against tautological properties: source each from the design never the code, try to beat the suite with a wrong implementation, classify every counterexample.",
+   "chapter": "prove"
+  },
+  {
+   "id": "skill-mutation-grading",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/mutation-grading/SKILL.md",
+   "oneLine": "mutation-grading \u2014 grade whether tests actually bite by injecting small bugs; every surviving mutant is a weak test to fix or dead code to delete, so read each one.",
+   "chapter": "prove"
+  },
+  {
+   "id": "skill-no-op-paths",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/no-op-paths/SKILL.md",
+   "oneLine": "no-op-paths \u2014 any conditionally-mutating method (prune, evict, expire, gc) needs a test where the trigger is not met and post-state equals pre-state.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-one-meaning-per-term",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/one-meaning-per-term/SKILL.md",
+   "oneLine": "one-meaning-per-term \u2014 a load-bearing spec term must carry exactly one meaning; a word that passes the two-meanings test is a defect to split or disambiguate.",
+   "chapter": "carve"
+  },
+  {
+   "id": "skill-pr-sizing",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/pr-sizing/SKILL.md",
+   "oneLine": "pr-sizing \u2014 bundle or ship changes by the operator's attention (one reviewable milestone per PR), not by the agent's construction unit.",
+   "chapter": "ship"
+  },
+  {
+   "id": "skill-properties",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/properties/SKILL.md",
+   "oneLine": "properties \u2014 pin behavior over structured input with generated properties from two sources, the data's schema and the design, instead of a handful of examples.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-read-the-system",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/read-the-system/SKILL.md",
+   "oneLine": "read-the-system \u2014 before any runtime-behavior claim about unfamiliar code, open and read the implementation; a name or grep hit is a lead, not a fact.",
+   "chapter": "map"
+  },
+  {
+   "id": "skill-reproducibility-baseline",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/reproducibility-baseline/SKILL.md",
+   "oneLine": "reproducibility-baseline \u2014 build a no-drift baseline before changing behavior-critical code: replay-and-diff if deterministic, else golden-master or injected clock/RNG/I-O seams.",
+   "chapter": "pin"
+  },
+  {
+   "id": "skill-silent-failure-census",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/silent-failure-census/SKILL.md",
+   "oneLine": "silent-failure-census \u2014 sweep for every place that can fail without a trace (swallowed exceptions, ignored returns, fire-and-forget) and classify each real-vs-benign.",
+   "chapter": "map"
+  },
+  {
+   "id": "skill-system-truth-atlas",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/system-truth-atlas/SKILL.md",
+   "oneLine": "system-truth-atlas \u2014 assemble MAP's deliverable: a committed diagnostic of verified code map, footgun register, recovered-risk register, and silent-failure census.",
+   "chapter": "map"
+  },
+  {
+   "id": "skill-trace-requirements-to-tests",
+   "type": "source",
+   "label": "SKILL.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/pdd/skills/trace-requirements-to-tests/SKILL.md",
+   "oneLine": "trace-requirements-to-tests \u2014 every stated requirement carries a mechanically checkable link to a test that would fail if it were violated; no link, no coverage claim.",
+   "chapter": "prove"
+  },
+  {
+   "id": "design-budget-aware-chunking",
+   "type": "source",
+   "label": "budget-aware-chunking.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/budget-aware-chunking.md",
+   "oneLine": "Implementation plan for the machine-cost sizing axis: estimate each chunk's mutation cost from a calibrated model and split folder groups in CARVE until they fit the gate budget.",
+   "chapter": "carve"
+  },
+  {
+   "id": "design-five-model-experiment",
+   "type": "source",
+   "label": "five-model-experiment.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/five-model-experiment.md",
+   "oneLine": "Five-arm experiment (raw vs PDD across Opus/Sonnet/Haiku on cli/src): the PDD taxonomy raises precision at every capable tier while trading high-severity recall.",
+   "chapter": "prove"
+  },
+  {
+   "id": "design-map-report-format",
+   "type": "source",
+   "label": "map-report-format.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/map-report-format.md",
+   "oneLine": "Design spec for the buyer-credible MAP diagnostic report: the translation layer that turns findings/units/mutation output into a document a CTO reads and acts on.",
+   "chapter": "map"
+  },
+  {
+   "id": "design-multi-language-flows",
+   "type": "source",
+   "label": "multi-language-flows.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/multi-language-flows.md",
+   "oneLine": "Design for polyglot repos: a project stays one .pdd/ but declares a set of language-flows, each a complete single-language pipeline with its own gates and test runner.",
+   "chapter": "general"
+  },
+  {
+   "id": "design-phase2-refactor-model",
+   "type": "source",
+   "label": "phase2-refactor-model.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/phase2-refactor-model.md",
+   "oneLine": "Design decisions for obsolete-and-replace: disposition chosen per unit at the curate gate, the refactor as a shared object with consume/produce/affects edges and computed blast radius.",
+   "chapter": "remediate"
+  },
+  {
+   "id": "design-python-pack",
+   "type": "source",
+   "label": "python-pack.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/python-pack.md",
+   "oneLine": "The Python gate-pack plan (PRs 1-6) behind the stdio pack contract: libcst-based byte-splice mutants, with PR1's derisk skeleton already GREEN on a real pytest loop.",
+   "chapter": "gate"
+  },
+  {
+   "id": "design-selfrun-pdd-vs-control",
+   "type": "source",
+   "label": "selfrun-pdd-vs-control.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/design/selfrun-pdd-vs-control.md",
+   "oneLine": "Self-run experiment on PDD's own CLI: PDD vs an unstructured agent was a near-tie on raw finds but PDD won precision (97% vs 74%) and produced a proven test-adequacy grade the control cannot.",
+   "chapter": "prove"
+  },
+  {
+   "id": "evidence-pbt-pilot-compiler",
+   "type": "source",
+   "label": "pbt-pilot-compiler.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/evidence/pbt-pilot-compiler.md",
+   "oneLine": "Field report on a real TypeScript game compiler, run under an enforce-or-drop rule: the property-plus-mutation layer bites, but narrowly and predictably, and where it bites was the more useful finding.",
+   "chapter": "prove"
+  },
+  {
+   "id": "artifact.roadmap-dossier",
+   "type": "artifact",
+   "label": "roadmap dossier",
+   "payload": "GET /api/roadmap (plan server :4318, and gallery :4319 as /api/roadmap?project=<name>). Shape = RoadmapPayload (cli/src/commands/plan.ts:196): verdict + counts (approved/denied/pending), budgetMinutes, and units[] where each unit carries id, subsystem, rank, risk/size + riskBasis/sizeBasis (the 'why'), findingFingerprints, joined findings[] (ProjectedFinding: title, file:line locus, clickable href via SourceLink GitHub-blob or editor link, classification badge, evidence key/value pairs, siteCount) plus summary (atlas code-map context line) and cost (CostComparison est\u2192actual (drift), overBudget flag), plus refactors[] with computed blast radius. Built by roadmapPayload \u2192 joinRoadmapFindings (pure, unit-tested).",
+   "renderer": "Gallery TS component cli/ui/src/components/RoadmapView.tsx rendered with interactive={false} (verdict strip, unit rows with risk dot / rank / risk-size / findings count / CostChip, expandable per-finding dossier with evidence and lock-badged private links). Same payload also drives the plan-dashboard's interactive roadmap tab (cli/plan-dashboard/app.js renderRoadmap, unit rows + refactor meta-rows) \u2014 for a public doc the read-only RoadmapView is the right renderer.",
+   "snapshotHow": "Gallery-export precedent applies DIRECTLY \u2014 the public alextavor.github.io/gallery was built by rebuilding the esbuild bundle (npm run build:ui) with fetch('/api/roadmap?project=X') rewritten to static /gallery/api/*.json, curled from a live `pdd gallery /Users/alextavor/Documents/Alex/pdd-corpus`. For a narrative-doc modal: curl http://127.0.0.1:4319/api/roadmap?project=<name> > api/roadmap-<name>-2026-07-03.json and point the rewritten RoadmapView bundle (or an inlined copy) at it. Payload is fully self-contained (findings already joined server-side), so the static snapshot renders identically.",
+   "chapter": "CARVE \u2014 the risk-ranked remediation roadmap, and why each unit ranks where it does"
+  },
+  {
+   "id": "artifact.corpus-rail",
+   "type": "artifact",
+   "label": "corpus rail",
+   "payload": "GET /api/corpus (gallery :4319). Shape = CorpusListing (cli/src/corpus.ts:27): root + projects[] {name, pddDir (ABSOLUTE local path \u2014 strip or ignore for public), domain, verdict (static-gate pass/fail), units (live unitCount from the snapshot's units.json, manifest fallback), grade ('68%'), ranFullMap, visibility}. Manifest-first from <corpus>/index.json (live corpus at /Users/alextavor/Documents/Alex/pdd-corpus), derived directory-scan fallback.",
+   "renderer": "Gallery Rail component in cli/ui/src/gallery/main.tsx (project buttons with domain line + verdict/units/grade chips, 'static only' warn chip when ranFullMap is false).",
+   "snapshotHow": "Already snapshotted once by the gallery-export precedent (the public gallery's /gallery/api/corpus.json IS this payload, curled from a live gallery). Dated modal snapshot: curl http://127.0.0.1:4319/api/corpus > api/corpus-2026-07-03.json; scrub the pddDir absolute paths (the rail never displays them; only the live server uses them for name\u2192dir resolution).",
+   "chapter": "The corpus \u2014 what has been analyzed so far, at a glance"
+  },
+  {
+   "id": "artifact.project-summary",
+   "type": "artifact",
+   "label": "project summary",
+   "payload": "GET /api/summary?project=<name> (gallery :4319). Shape = ProjectSummary (cli/src/corpus.ts:152): the raw manifest entry passed through (loc, sourceFiles/testFiles/testCount, languages/tsPercent, duplication, git age/active span, coverage, stars, license, lastPush, analyzedAt, analysis.gradeScore + gradeMutants killed/total, fullMapUnits, checkVerdict), findings totals computed live from the .pdd (total, bySeverity, byKind \u2014 grade survivors collapsed to 'test-gap' \u2014, byStatus/classification), and run (model / costUsd or tokens / durationMs) or null ('not recorded').",
+   "renderer": "cli/ui/src/components/SummaryPanel.tsx (title + domain\u00b7framework\u00b7architecture sub, provenance line, RunRow, 10-stat grid, severity/kind/status chip rows, and the fixed trust paragraph 'Every issue here was schema-validated\u2026').",
+   "snapshotHow": "Gallery-export precedent applies (the public gallery snapshots this per project as static JSON). curl http://127.0.0.1:4319/api/summary?project=<name> > api/summary-<name>-2026-07-03.json; renders offline with SummaryPanel unchanged since everything is precomputed server-side.",
+   "chapter": "One project's diagnostic card \u2014 cost, scale, adequacy, findings totals"
+  },
+  {
+   "id": "artifact.build-plan-gantt",
+   "type": "artifact",
+   "label": "build plan gantt",
+   "payload": "GET /api/plan (plan server :4318). Shape = planPayload (cli/src/commands/plan.ts:78): the durable .pdd/plan.json items (id, title, phase, status, deps, \u2026) + server-derived graph (DAG depth/order + warnings: cycles, dangling deps) + the live progress overlay (.pdd/.run/plan-progress.json: activeItemId, lastEvent, per-item statuses that win over static ones) + repo name. Companion GET /api/plan/health returns just the warnings.",
+   "renderer": "Plan-dashboard vanilla app.js 'build plan' view (cli/plan-dashboard/app.js): renderGantt + renderPhaseChips + renderDetail (per-item dependency panel, 'depends on \u2026 none \u2014 startable now'), renderNow ('now building X' dot), renderHealth (plan-graph warnings banner). No TS-gallery equivalent yet (memory: app.js is the legacy surface, new UI routes to the gallery).",
+   "snapshotHow": "No export precedent for the plan-dashboard \u2014 two options: (a) same fetch-rewrite trick applied to the vanilla app.js (point getJson('/api/plan') at a dated static JSON; app.js has only 3 GET fetches on this view, and the POST seams are dead in a static context); (b) simpler for a narrative modal: curl http://127.0.0.1:4318/api/plan > api/plan-2026-07-03.json and screenshot the live gantt, since the interactive view (click-through detail, live poll) adds little to a frozen story beat. The underlying .pdd/plan.json is durable and committed, so a git-SHA-pinned copy is also a valid dated snapshot (the graph derivation is deterministic).",
+   "chapter": "PDD building itself \u2014 the self-hosted plan as gantt"
+  },
+  {
+   "id": "artifact.map-run-tracker",
+   "type": "artifact",
+   "label": "map run tracker",
+   "payload": "GET /api/map-run (plan server :4318). Shape = MapRunPayload (cli/src/commands/plan.ts:274): run {phase, state running/done/aborted, sweep [{name, code}], provider, skipSweep, startedAt, finishedAt} from .pdd/.run/map.json, atlas {state, global done/total subsystems + authored counts} and classify {state, global total/done/kept/dropped} rollups, carve.units (the EFFECTIVE ledger-replayed unit count). null run = no MAP driven yet.",
+   "renderer": "Plan-dashboard app.js renderMapRun (cli/plan-dashboard/app.js:812): the 4-step tracker sweep \u2192 atlas \u2192 classify \u2192 carve with per-step detail strings ('12/12 subsystems', '40 kept \u00b7 3 dropped', 'N units') and running/aborted/done header states; renderLaunch is the paired write control (irrelevant static).",
+   "snapshotHow": "TRANSIENT \u2014 lives in .pdd/.run/, wiped between runs, so the snapshot must be curled at the moment of interest: capture once mid-run (state 'running', a step active) and once at completion ('MAP complete \u2014 roadmap ready below') during a real MAP; save as api/map-run-<project>-2026-07-03.json. No gallery precedent (gallery has no run endpoints); a static modal would replay the two frozen states, which is exactly the narrative beat ('watch the MAP resolve').",
+   "chapter": "MAP running \u2014 the pipeline resolving into a roadmap"
+  },
+  {
+   "id": "artifact.remediation-worklist",
+   "type": "artifact",
+   "label": "remediation worklist",
+   "payload": "GET /api/remediation (plan server :4318). Shape = RemediationRoadmap (cli/src/remediation/status.ts:88): verdict GREEN/PENDING/EMPTY, finalized (operator signed off), units[] = the APPROVED roadmap units in carve order, each {unit: WorkingUnit, status: {state pending|in-progress|green|needs-hitl|committed|error, attempts, startedAt, updatedAt, note}} joined from durable .pdd/remediation/status.json.",
+   "renderer": "NONE yet \u2014 no dashboard or gallery component fetches /api/remediation (verified: only tests and CLI help reference it; `pdd remediate` prints 'watch live on `pdd plan` (/api/remediation)' but the UI view is unbuilt). A narrative modal would need a purpose-built table (state-colored rows mirroring the roadmap rows) or show curated raw JSON.",
+   "snapshotHow": "curl http://127.0.0.1:4318/api/remediation > api/remediation-2026-07-03.json (durable inputs \u2014 units.json + ledger + remediation/status.json \u2014 so it re-mints identically from a committed .pdd snapshot). Gallery-export precedent does NOT directly apply (no existing renderer to rebundle); cheapest honest snapshot is the JSON itself plus the state-lifecycle legend from status.ts.",
+   "chapter": "REMEDIATE \u2014 the approved units moving through the fix loop"
+  },
+  {
+   "id": "artifact.merged-findings",
+   "type": "artifact",
+   "label": "merged findings",
+   "payload": "GET /api/findings (findings dashboard :4317). Shape = mergeFindings (cli/src/mutation/findings.ts): slices[] provenance (source check/prove/map/grade:<id>, generatedAt, verdict/score), gates[] (gate, mode block/warn, verdict, finding count, summary), findings[] + rolled[] (deduped: fingerprint, title, detail, severity, kind footgun/risk/silent-failure/code-map/mutant-operator, locus file:line, classification overlay from .pdd/findings/classifications.json), counts facets (bySource/bySeverity/byStatus/byClassification), repo name.",
+   "renderer": "Findings dashboard cli/dashboard/app.js: renderGates (the gate/mode/verdict strip that subsumes `pdd status`), renderFacets (AND-combined filter chips), findings list + per-finding detail pane. No TS-gallery equivalent (the gallery consumes the same rolled findings only via the roadmap join).",
+   "snapshotHow": "No export precedent; curl http://127.0.0.1:4317/api/findings > api/findings-2026-07-03.json. Inputs are all durable (.pdd/findings/*.json + units/*/mutation.json), so it also re-mints from a committed snapshot. For the doc, the roadmap dossier usually tells this story better (findings pre-joined to units); use this payload when the beat is the raw gate strip / facet counts.",
+   "chapter": "The gate verdicts and the raw finding stream, before carving"
+  },
+  {
+   "id": "artifact.grade-status-grid",
+   "type": "artifact",
+   "label": "grade status grid",
+   "payload": "GET /api/status (findings dashboard :4317). Shape = .pdd/.run/grade-status.json: engine, startedAt, global {unitsTotal, unitsDone, running, queued, stale, errored}, units[] {id, scope, state, score, survivors, mutantsRun/Total, durationMs, loc, hash}. Companions /api/atlas-run and /api/classify-run stream the per-item atlas/classify progress the same way.",
+   "renderer": "Findings dashboard app.js async-jobs tracker + score-colored unit grid (cli/dashboard/app.js, poll at line 377; atlas/classify row renderers around line 180).",
+   "snapshotHow": "Transient (.run/) \u2014 curl during or right after a live grade: curl http://127.0.0.1:4317/api/status > api/grade-status-2026-07-03.json. Lower narrative value than mutation.json itself (below), which is durable and carries the actual survivors; use this only for a 'grade in flight' beat.",
+   "chapter": "PROVE in flight \u2014 the mutation grade streaming"
+  },
+  {
+   "id": "artifact.unit-mutation-survivors",
+   "type": "artifact",
+   "label": "unit mutation survivors",
+   "payload": "GET /api/unit/<id> (findings dashboard :4317) = the durable file .pdd/units/<id>/mutation.json verbatim. Shape = GradeResults (cli/src/commands/grade-results.ts:32): scope, engine, gradedAt, durationMs, loc, totals {mutants, killed, survived, uncovered, stale}, score, and survivors[] {file, line, operator, snippet, status survived|uncovered, ranTests, classification 'pending'} \u2014 the fault-injection receipts.",
+   "renderer": "Findings dashboard app.js survivor-triage detail (per-unit drill-down from the grid); survivors also surface as grade findings in /api/findings and as the cost 'actual' on roadmap units.",
+   "snapshotHow": "Easiest of all: the artifact is ALREADY a durable dated file on disk \u2014 copy .pdd/units/<id>/mutation.json (gradedAt is the date stamp) into the doc's api/ dir, no server needed. A survivor list with real snippet + ranTests is the single most persuasive proof artifact for the 'adequacy proven by fault injection, not estimated' claim the SummaryPanel makes.",
+   "chapter": "Proof \u2014 the mutants that survived, with the exact snippet and the tests that ran"
+  },
+  {
+   "id": "artifact.units-json-carve-baseline",
+   "type": "artifact",
+   "label": "units json carve baseline",
+   "payload": "Non-API durable artifact .pdd/units.json. Shape = UnitsDoc (cli/src/units.ts:59): version, generatedAt, depth, order[], units[] {id, title, subsystem, scope globs, size/risk + riskBasis/sizeBasis, findingFingerprints, dependsOn, rank, state, curated, estMinutes, riskScore + riskScoreBasis {score, exposure, findings, fanIn, covGap}}. Deterministic, byte-identical re-carve.",
+   "renderer": "Never rendered raw \u2014 /api/roadmap is its presentable projection (ledger replayed + findings joined + cost attached). For the doc, show a trimmed excerpt (one unit's riskScoreBasis) as a code block beside the rendered roadmap modal to make 'the ranking is traceable' concrete.",
+   "snapshotHow": "Copy the committed file at a git SHA (it is durable, allowlisted in .pdd/, and generatedAt-stamped) \u2014 no server, no rewrite. If a rendered view is wanted, mint it via the roadmap-dossier candidate instead.",
+   "chapter": "CARVE internals \u2014 the deterministic baseline the roadmap derives from"
+  },
+  {
+   "id": "artifact.roadmap-ledger-audit",
+   "type": "artifact",
+   "label": "roadmap ledger audit",
+   "payload": "Non-API durable artifact .pdd/roadmap-ledger.json (cli/src/roadmap.ts:47). Append-only, replayable audit of HITL decisions: entries[] of approve | deny | edit | move | split | signoff ops with timestamps; the effective roadmap is derived by replaying it over units.json, so every decision (even overridden ones) survives as a reviewable git diff.",
+   "renderer": "No direct renderer \u2014 its EFFECT renders as decision badges/counts in /api/roadmap (RoadmapView verdict strip: 'N approved \u00b7 N denied \u00b7 N pending') and as strike-through curation in the plan-dashboard roadmap tab. For the doc: a short entries excerpt as a code block ('the audit trail'), paired with before/after roadmap snapshots.",
+   "snapshotHow": "Copy the committed file (append-only, entries self-dated). The compelling static story is a pair: roadmap payload curled before a curation session and after, plus the ledger diff between them \u2014 all three re-mintable from two git SHAs of the .pdd snapshot.",
+   "chapter": "HITL curation \u2014 decisions as an append-only, replayable ledger"
+  },
+  {
+   "id": "artifact.calibration-ledger",
+   "type": "artifact",
+   "label": "calibration ledger",
+   "payload": "Non-API durable artifact .pdd/calibration.jsonl (cli/src/calibration.ts): append-only JSONL of real proof-run costs, one CalibrationRecord per line (per-run wallMs/mutants/loc datapoints; seeded with the compiler datapoint), consumed by cost.ts fit \u2014 the source of the secPerMutant constant (2.38 measured vs 0.30 assumed) and the est/actual/drift chips on roadmap units.",
+   "renderer": "No UI renderer \u2014 it surfaces indirectly as CostChip drift on RoadmapView / app.js costChip and the budget line 'budget Nm'. For the doc: render the records as a small table or scatter (est vs actual) in the modal; the drift-correction story ('we assumed 0.30s/mutant, the ledger said 2.38') is the beat.",
+   "snapshotHow": "Copy the file (records are self-dated, append order meaningless by contract). No precedent needed \u2014 it is already static.",
+   "chapter": "Budget-aware chunking \u2014 calibrating the cost model on real runs"
+  },
+  {
+   "id": "artifact.constitution",
+   "type": "artifact",
+   "label": "constitution",
+   "payload": "Non-API durable artifact .pdd/constitution.md \u2014 the human-readable law: active gates each with mode (block/warn) and a one-line rationale ('the off-by-one lives at x == limit', 'a failure that leaves no trace looks healthy while it's wrong'), plus the modes legend. .pdd/config.yaml is its machine-readable twin.",
+   "renderer": "No UI renderer (it is prose by design). In the doc, render the markdown directly in a modal \u2014 it already reads as narrative and pairs with the gate strip from /api/findings (the same gates, live verdicts).",
+   "snapshotHow": "Copy the committed markdown at a git SHA; add the SHA/date in the modal caption. Zero minting work.",
+   "chapter": "The constitution \u2014 what this project commits to, and what blocks a merge"
+  },
+  {
+   "id": "code.spine",
+   "type": "source",
+   "label": "spine.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/map/spine.ts",
+   "oneLine": "the pdd map orchestrator, cost-ordered"
+  },
+  {
+   "id": "code.sweep",
+   "type": "source",
+   "label": "sweep.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/map/sweep.ts",
+   "oneLine": "the best-effort mechanical sweep"
+  },
+  {
+   "id": "code.scope-ranking",
+   "type": "source",
+   "label": "scope.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/scope.ts",
+   "oneLine": "density+churn subsystem ranking"
+  },
+  {
+   "id": "code.atlas-cache",
+   "type": "source",
+   "label": "atlas-cache.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/map/atlas-cache.ts",
+   "oneLine": "content-addressed atlas fragment cache"
+  },
+  {
+   "id": "code.carve",
+   "type": "source",
+   "label": "carve.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/map/carve.ts",
+   "oneLine": "the deterministic carve"
+  },
+  {
+   "id": "code.grouping-seam",
+   "type": "source",
+   "label": "grouping.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/map/grouping.ts",
+   "oneLine": "the replaceable finding->unit grouping seam"
+  },
+  {
+   "id": "code.roadmap-ledger",
+   "type": "source",
+   "label": "roadmap.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/roadmap.ts",
+   "oneLine": "append-only ledger + replay-derived roadmap"
+  },
+  {
+   "id": "code.refactor-object",
+   "type": "source",
+   "label": "refactor.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/refactor.ts",
+   "oneLine": "the refactor ledger object + decision-total gate"
+  },
+  {
+   "id": "code.blast-radius",
+   "type": "source",
+   "label": "blast-radius.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/blast-radius.ts",
+   "oneLine": "ts-morph find-all-references affects computation"
+  },
+  {
+   "id": "code.units",
+   "type": "source",
+   "label": "units.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/units.ts",
+   "oneLine": "unit anatomy: fingerprints, risk/size basis"
+  },
+  {
+   "id": "code.remediate-loop",
+   "type": "source",
+   "label": "orchestrate.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/remediation/orchestrate.ts",
+   "oneLine": "the per-unit fix loop state machine"
+  },
+  {
+   "id": "code.gates-registry",
+   "type": "source",
+   "label": "config.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/config.ts",
+   "oneLine": "the nine-gate registry + flows config"
+  },
+  {
+   "id": "code.prove",
+   "type": "source",
+   "label": "prove.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/commands/prove.ts",
+   "oneLine": "the targeted boundary-mutation oracle"
+  },
+  {
+   "id": "code.mutators",
+   "type": "source",
+   "label": "mutators.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/packs/typescript/mutators.ts",
+   "oneLine": "the nine broad mutation operators"
+  },
+  {
+   "id": "code.calibration",
+   "type": "source",
+   "label": "calibration.ts",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/calibration.ts",
+   "oneLine": "the append-only cost-calibration ledger"
+  },
+  {
+   "id": "code.pack-contract",
+   "type": "source",
+   "label": "CONTRACT.md",
+   "target": "https://github.com/AlexTavor/proof-driven-development/blob/main/cli/src/packs/CONTRACT.md",
+   "oneLine": "the JSON language-pack contract"
+  },
+  {
+   "id": "concept.test-adequacy",
+   "type": "concept",
+   "label": "Test adequacy",
+   "targets": [
+    "doc-core-tests-that-constrain-behavior",
+    "doc-reference-pdd-prove-vs-pdd-grade",
+    "term.mutation-grading",
+    "explorer.family.adequacy"
+   ]
+  },
+  {
+   "id": "concept.the-five-moves",
+   "type": "concept",
+   "label": "The five moves",
+   "targets": [
+    "explorer.verb.map",
+    "explorer.verb.pin",
+    "explorer.verb.carve",
+    "explorer.verb.ship",
+    "explorer.verb.prove"
+   ]
+  },
+  {
+   "id": "concept.silent-failure",
+   "type": "concept",
+   "label": "Silent failure",
+   "targets": [
+    "doc-core-keep-failures-visible",
+    "term.silent-failure",
+    "explorer.family.nsf"
+   ]
+  },
+  {
+   "id": "concept.refactor-model",
+   "type": "concept",
+   "label": "The refactor model",
+   "targets": [
+    "doc-core-refactor-obsolete-and-replace",
+    "doc-reference-pdd-roadmap-curate-gate",
+    "code.refactor-object",
+    "code.blast-radius"
+   ]
+  },
+  {
+   "id": "concept.hitl-gate",
+   "type": "concept",
+   "label": "The human-in-the-loop gate",
+   "targets": [
+    "doc-reference-pdd-roadmap-curate-gate",
+    "term.curate-gate",
+    "term.sign-off",
+    "artifact.roadmap-dossier"
+   ]
+  },
+  {
+   "id": "concept.write-boundary",
+   "type": "concept",
+   "label": "The validated write boundary",
+   "targets": [
+    "doc-reference-agent-seams",
+    "term.model-b---write-boundary",
+    "code.roadmap-ledger"
+   ]
+  }
+ ]
+}

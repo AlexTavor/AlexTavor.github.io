@@ -136,3 +136,48 @@ body { background: var(--bg); color: var(--text); font: 13px/1.45 ui-sans-serif,
   .panel-mobilebar { display: flex; justify-content: flex-end; position: sticky; top: 0; background: var(--panel); padding-bottom: 6px; margin: -4px 0 2px; }
   .panel-close { background: #334155; color: #fff; border: none; border-radius: 8px; width: 30px; height: 30px; font-size: 18px; line-height: 1; cursor: pointer; }
 }
+
+/* ── Guide view ─────────────────────────────────────────────────────────────── */
+/* Reading layout: a measure-limited column, unlike the full-bleed graph stage. */
+.guide { overflow-y: auto; height: calc(100vh - 52px); padding: 1.5rem 1rem 4rem; }
+.guide article { max-width: 46rem; margin: 0 auto; }
+.guide-chapter { margin-bottom: 2.2rem; }
+.guide-chapter h2 { font-size: 1.15rem; margin: 0 0 .35rem; }
+.guide-subtitle { color: var(--muted, #8a8f98); font-style: italic; margin: 0 0 .6rem; font-size: .88rem; }
+.guide p, .guide li { line-height: 1.55; font-size: .92rem; margin: 0 0 .65rem; }
+.guide ul, .guide ol { padding-left: 1.3rem; margin: 0 0 .65rem; }
+.guide-index { max-width: 46rem; margin: 0 auto 1.6rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.guide-index button { font-size: .78rem; padding: .25rem .6rem; border: 1px solid var(--line, #2a2f3a); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.guide-index button:hover { border-color: var(--accent, #6ea8fe); }
+
+/* Entity affordances: one visual identity per behavior, learned once. */
+.ent { font: inherit; }
+button.ent { background: none; border: none; padding: 0; color: inherit; cursor: pointer; }
+.ent-term { border-bottom: 1px dotted var(--muted, #8a8f98); cursor: help; position: relative; }
+.ent-term:hover::after, .ent-term:focus::after {
+  content: attr(data-gloss); position: absolute; left: 0; top: 1.5em; z-index: 30;
+  width: 22rem; max-width: 70vw; padding: .5rem .65rem; border-radius: 6px;
+  background: var(--panel, #171b22); border: 1px solid var(--line, #2a2f3a);
+  font-size: .8rem; line-height: 1.4; white-space: normal; color: var(--fg, #d7dae0);
+}
+.ent-src { color: var(--accent, #6ea8fe); text-decoration: none; border-bottom: 1px solid currentColor; }
+.ent-src::after { content: '↗'; font-size: .75em; margin-left: .15em; }
+.ent-jump { color: var(--accent, #6ea8fe); border-bottom: 1px dashed currentColor; }
+.ent-artifact { color: var(--accent2, #7ee0a3); border-bottom: 1px solid currentColor; }
+.ent-artifact::after { content: ' ▣'; font-size: .8em; }
+.ent-concept { color: inherit; border-bottom: 1px solid var(--line, #2a2f3a); }
+.ent-missing { background: #7a2030; border-radius: 3px; padding: 0 .2em; }
+.ent-concept-wrap { position: relative; }
+.concept-menu { position: absolute; left: 0; top: 1.6em; z-index: 30; display: flex; flex-direction: column; gap: .3rem;
+  min-width: 14rem; padding: .5rem .65rem; border-radius: 6px; background: var(--panel, #171b22);
+  border: 1px solid var(--line, #2a2f3a); font-size: .85rem; }
+.concept-item { white-space: nowrap; }
+
+/* Artifact snapshot modal (placeholder body until snapshots are minted). */
+.guide-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; display: flex; align-items: center; justify-content: center; }
+.guide-modal { background: var(--panel, #171b22); border: 1px solid var(--line, #2a2f3a); border-radius: 8px;
+  max-width: 34rem; width: calc(100vw - 3rem); padding: 1rem 1.2rem; position: relative; }
+.guide-modal h3 { margin: 0 0 .5rem; text-transform: capitalize; }
+.guide-modal p { font-size: .85rem; line-height: 1.45; margin: 0 0 .5rem; }
+.guide-modal-note { color: var(--muted, #8a8f98); font-style: italic; }
+.guide-modal-close { position: absolute; top: .4rem; right: .6rem; background: none; border: none; color: inherit; font-size: 1.1rem; cursor: pointer; }
