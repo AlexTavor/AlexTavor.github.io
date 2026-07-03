@@ -3,7 +3,7 @@ import { graph, orphanRules } from './model';
 import PddGraph, { type FocusTarget } from './PddGraph';
 import DetailPanel from './DetailPanel';
 import Home from './Home';
-import Guide from './Guide';
+import Guide, { SECTION_IDS } from './Guide';
 import Legend from './Legend';
 import Menu from './Menu';
 import { VIEW_EMOJI } from './copy';
@@ -29,7 +29,10 @@ function parseHash(h: string): { viewId: string; nodeId: string | null } | null 
   const [v, n] = raw.split('/').map((s) => decodeURIComponent(s));
   const viewOk = v === README_ID || v === GUIDE_ID || graph.views.some((view) => view.id === v);
   if (!viewOk) return null;
-  const nodeId = n && graph.nodes.some((node) => node.id === n) ? n : null;
+  // The second segment is a node id on graph views, a section id on the guide.
+  const nodeId = v === GUIDE_ID
+    ? (n && SECTION_IDS.includes(n) ? n : null)
+    : (n && graph.nodes.some((node) => node.id === n) ? n : null);
   return { viewId: v, nodeId };
 }
 
@@ -41,7 +44,9 @@ export default function App() {
   const [toggles, setToggles] = useState<Toggles>({ showProvisional: true });
   const [selected, setSelected] = useState<string | null>(initialRef.current?.nodeId ?? null);
   const [focus, setFocus] = useState<FocusTarget | null>(
-    initialRef.current?.nodeId ? { id: initialRef.current.nodeId, nonce: 1 } : null,
+    initialRef.current?.nodeId && initialRef.current.viewId !== GUIDE_ID
+      ? { id: initialRef.current.nodeId, nonce: 1 }
+      : null,
   );
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,7 +69,7 @@ export default function App() {
       if (!p) { setSelected(null); setViewId(README_ID); return; }
       setViewId(p.viewId);
       setSelected(p.nodeId);
-      if (p.nodeId) setFocus({ id: p.nodeId, nonce: ++nonce.current });
+      if (p.nodeId && p.viewId !== GUIDE_ID) setFocus({ id: p.nodeId, nonce: ++nonce.current });
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
@@ -167,7 +172,7 @@ export default function App() {
         </div>
       </header>
       {viewId === GUIDE_ID ? (
-        <Guide onJump={showInView} />
+        <Guide onJump={showInView} section={selected} onSection={(id) => setSelected(id)} />
       ) : view ? (
         <main className="stage">
           <PddGraph view={view} toggles={toggles} onSelect={onSelect} focus={focus} />

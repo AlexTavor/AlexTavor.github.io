@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import guideData from '../guide.json';
 import entitiesData from '../entities.json';
@@ -32,6 +32,10 @@ const ENTITIES: Map<string, Entity> = new Map(
 );
 const SECTIONS = guideData.sections as Section[];
 
+// The section ids double as the guide's deep-link vocabulary (#guide/<id>); App validates
+// hashes against this list the same way graph views validate node ids.
+export const SECTION_IDS: string[] = SECTIONS.map((s) => s.id);
+
 // An explorer entity's target is a production URL (#<view>/<node>); inside the app we jump
 // to the node directly instead of opening a second copy of ourselves.
 function explorerHash(e: Entity): { viewId: string; nodeId: string } | null {
@@ -41,11 +45,54 @@ function explorerHash(e: Entity): { viewId: string; nodeId: string } | null {
   return viewId && nodeId ? { viewId, nodeId } : null;
 }
 
-interface Props { onJump: (viewId: string, nodeId: string) => void }
+interface Props {
+  onJump: (viewId: string, nodeId: string) => void;
+  section: string | null; // deep-linked / index-selected section (#guide/<id>)
+  onSection: (id: string) => void; // mirror the reading position back into the hash
+}
 
-export default function Guide({ onJump }: Props) {
+export default function Guide({ onJump, section, onSection }: Props) {
   const [modal, setModal] = useState<Entity | null>(null);
   const [openConcept, setOpenConcept] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  // Which section the scroll-spy last reported. The scroll effect skips when the incoming
+  // `section` came from the spy itself, so reading never fights programmatic scrolling.
+  const spyRef = useRef<string | null>(null);
+  const throttle = useRef(0);
+  const sectionRef = useRef(section); sectionRef.current = section;
+  const onSectionRef = useRef(onSection); onSectionRef.current = onSection;
+
+  // Deep link / index click → scroll. Runs on mount too, so #guide/prove opens at PROVE.
+  // behavior 'auto', deliberately: a deep link into a long document should position instantly
+  // (smooth over thousands of pixels is seconds of crawl, and never completes in a hidden tab).
+  useEffect(() => {
+    if (!section || section === spyRef.current) return;
+    document.getElementById(`guide-${section}`)?.scrollIntoView({ behavior: 'auto', block: 'start' });
+  }, [section]);
+
+  // Scroll-spy: the hash follows the reading position (last section whose heading passed the
+  // sticky index), so copying the address bar shares the spot being read. Timeout throttle,
+  // not rAF — rAF is suspended in hidden tabs, and 80ms is imperceptible for hash updates.
+  const onScroll = () => {
+    clearTimeout(throttle.current);
+    throttle.current = window.setTimeout(() => {
+      const m = mainRef.current;
+      if (!m) return;
+      const threshold = m.getBoundingClientRect().top + 72;
+      let current = SECTIONS[0].id;
+      for (const s of SECTIONS) {
+        const el = document.getElementById(`guide-${s.id}`);
+        if (el && el.getBoundingClientRect().top <= threshold) current = s.id;
+      }
+      // At the very bottom the last section may be too short to cross the threshold; reading
+      // the end of the document is reading the last section.
+      if (m.scrollTop >= m.scrollHeight - m.clientHeight - 2) current = SECTIONS[SECTIONS.length - 1].id;
+      if (current !== sectionRef.current) {
+        spyRef.current = current;
+        onSectionRef.current(current);
+      }
+    }, 80);
+  };
 
   // One renderer per entity type. A ref to an id missing from the registry renders visibly
   // broken (dev aid) rather than silently as plain text.
@@ -90,16 +137,21 @@ export default function Guide({ onJump }: Props) {
   // The index: section titles as in-page navigation. The verbs double as graph links via the
   // refs inside the sections themselves.
   const index = useMemo(() => SECTIONS.map((c) => ({ id: c.id, title: c.title })), []);
-  const scrollTo = (id: string) => document.getElementById(`guide-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const active = section ?? SECTIONS[0].id;
 
   return (
-    <main className="guide" onClick={(e) => {
+    <main ref={mainRef} className="guide" onScroll={onScroll} onClick={(e) => {
       // click-away closes an open concept menu; clicks inside it are handled before bubbling here
       if (!(e.target as HTMLElement).closest('.ent-concept-wrap')) setOpenConcept(null);
     }}>
       <nav className="guide-index" aria-label="Sections">
         {index.map((c) => (
-          <button key={c.id} onClick={() => scrollTo(c.id)}>{c.title.replace(/ — .*$/, '')}</button>
+          <button
+            key={c.id}
+            className={c.id === active ? 'active' : undefined}
+            aria-current={c.id === active ? 'true' : undefined}
+            onClick={() => { spyRef.current = null; onSection(c.id); }}
+          >{c.title.replace(/ — .*$/, '')}</button>
         ))}
       </nav>
       <article>

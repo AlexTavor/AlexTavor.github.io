@@ -138,46 +138,66 @@ body { background: var(--bg); color: var(--text); font: 13px/1.45 ui-sans-serif,
 }
 
 /* ── Guide view ─────────────────────────────────────────────────────────────── */
-/* Reading layout: a measure-limited column, unlike the full-bleed graph stage. */
-.guide { overflow-y: auto; height: calc(100vh - 52px); padding: 1.5rem 1rem 4rem; }
-.guide article { max-width: 46rem; margin: 0 auto; }
-.guide-chapter { margin-bottom: 2.2rem; }
-.guide-chapter h2 { font-size: 1.15rem; margin: 0 0 .35rem; }
-.guide-subtitle { color: var(--muted, #8a8f98); font-style: italic; margin: 0 0 .6rem; font-size: .88rem; }
-.guide p, .guide li { line-height: 1.55; font-size: .92rem; margin: 0 0 .65rem; }
-.guide ul, .guide ol { padding-left: 1.3rem; margin: 0 0 .65rem; }
-.guide-index { max-width: 46rem; margin: 0 auto 1.6rem; display: flex; flex-wrap: wrap; gap: .4rem; }
-.guide-index button { font-size: .78rem; padding: .25rem .6rem; border: 1px solid var(--line, #2a2f3a); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
-.guide-index button:hover { border-color: var(--accent, #6ea8fe); }
+/* Reading layout: a measure-limited column inside the app's flex column, unlike the
+   full-bleed graph stage. The guide itself is the scroller (scroll-spy hangs off it). */
+.guide { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 64px; }
+.guide article { max-width: 720px; margin: 0 auto; }
+.guide-index { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 6px;
+  max-width: 720px; margin: 0 auto; padding: 12px 0 10px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.guide-index button { font: inherit; font-size: 11px; padding: 4px 10px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--panel); color: var(--muted); cursor: pointer;
+  transition: color .12s, border-color .12s, background .12s; }
+.guide-index button:hover { color: #fff; border-color: #64748b; }
+.guide-index button.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.guide-section { scroll-margin-top: 56px; }
+.guide-section h2 { font-size: 17px; color: #fff; margin: 30px 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.guide-subtitle { color: var(--muted); font-style: italic; margin: 0 0 10px; font-size: 12px; }
+.guide p, .guide li { font-size: 13.5px; line-height: 1.65; margin: 0 0 10px; color: var(--text); }
+.guide ul, .guide ol { padding-left: 20px; margin: 0 0 10px; }
+.guide li { margin-bottom: 6px; }
+.guide strong { color: #fff; }
+.guide code { background: #0f172a; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 0.9em; }
 
-/* Entity affordances: one visual identity per behavior, learned once. */
+/* Entity affordances: one visual identity per behavior, learned once.
+   term = dotted (hover gloss) · source = solid blue + arrow (new tab) · jump = dashed blue
+   (in-app graph jump) · artifact = green (snapshot modal) · concept = grey solid (menu). */
 .ent { font: inherit; }
 button.ent { background: none; border: none; padding: 0; color: inherit; cursor: pointer; }
-.ent-term { border-bottom: 1px dotted var(--muted, #8a8f98); cursor: help; position: relative; }
+.ent-term { border-bottom: 1px dotted var(--muted); cursor: help; position: relative; }
 .ent-term:hover::after, .ent-term:focus::after {
-  content: attr(data-gloss); position: absolute; left: 0; top: 1.5em; z-index: 30;
-  width: 22rem; max-width: 70vw; padding: .5rem .65rem; border-radius: 6px;
-  background: var(--panel, #171b22); border: 1px solid var(--line, #2a2f3a);
-  font-size: .8rem; line-height: 1.4; white-space: normal; color: var(--fg, #d7dae0);
+  content: attr(data-gloss); position: absolute; left: 0; top: calc(100% + 6px); z-index: 30;
+  width: 340px; max-width: 72vw; padding: 9px 11px; border-radius: 6px;
+  background: var(--panel); border: 1px solid var(--line); box-shadow: 0 10px 28px rgba(0, 0, 0, .45);
+  font-size: 12px; font-style: normal; font-weight: 400; line-height: 1.5; white-space: normal; color: var(--text);
 }
-.ent-src { color: var(--accent, #6ea8fe); text-decoration: none; border-bottom: 1px solid currentColor; }
-.ent-src::after { content: '↗'; font-size: .75em; margin-left: .15em; }
-.ent-jump { color: var(--accent, #6ea8fe); border-bottom: 1px dashed currentColor; }
-.ent-artifact { color: var(--accent2, #7ee0a3); border-bottom: 1px solid currentColor; }
+.ent-src { color: #60a5fa; text-decoration: none; border-bottom: 1px solid rgba(96, 165, 250, .5); }
+.ent-src:hover { border-bottom-color: #60a5fa; }
+.ent-src::after { content: '↗'; font-size: .75em; margin-left: 2px; opacity: .8; }
+.ent-jump { color: #60a5fa; border-bottom: 1px dashed rgba(96, 165, 250, .6); }
+.ent-jump:hover { border-bottom-style: solid; }
+.ent-artifact { color: #4ade80; border-bottom: 1px solid rgba(74, 222, 128, .5); }
 .ent-artifact::after { content: ' ▣'; font-size: .8em; }
-.ent-concept { color: inherit; border-bottom: 1px solid var(--line, #2a2f3a); }
-.ent-missing { background: #7a2030; border-radius: 3px; padding: 0 .2em; }
+.ent-concept { color: var(--text); border-bottom: 1px solid #64748b; }
+.ent-concept .chev { color: var(--muted); }
+.ent-missing { background: #7f1d1d; border-radius: 3px; padding: 0 4px; }
 .ent-concept-wrap { position: relative; }
-.concept-menu { position: absolute; left: 0; top: 1.6em; z-index: 30; display: flex; flex-direction: column; gap: .3rem;
-  min-width: 14rem; padding: .5rem .65rem; border-radius: 6px; background: var(--panel, #171b22);
-  border: 1px solid var(--line, #2a2f3a); font-size: .85rem; }
+.concept-menu { position: absolute; left: 0; top: calc(100% + 6px); z-index: 30; display: flex; flex-direction: column; gap: 6px;
+  min-width: 240px; padding: 9px 11px; border-radius: 6px; background: var(--panel);
+  border: 1px solid var(--line); box-shadow: 0 10px 28px rgba(0, 0, 0, .45); font-size: 12.5px; }
 .concept-item { white-space: nowrap; }
 
 /* Artifact snapshot modal (placeholder body until snapshots are minted). */
-.guide-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; display: flex; align-items: center; justify-content: center; }
-.guide-modal { background: var(--panel, #171b22); border: 1px solid var(--line, #2a2f3a); border-radius: 8px;
-  max-width: 34rem; width: calc(100vw - 3rem); padding: 1rem 1.2rem; position: relative; }
-.guide-modal h3 { margin: 0 0 .5rem; text-transform: capitalize; }
-.guide-modal p { font-size: .85rem; line-height: 1.45; margin: 0 0 .5rem; }
-.guide-modal-note { color: var(--muted, #8a8f98); font-style: italic; }
-.guide-modal-close { position: absolute; top: .4rem; right: .6rem; background: none; border: none; color: inherit; font-size: 1.1rem; cursor: pointer; }
+.guide-modal-backdrop { position: fixed; inset: 0; background: rgba(2, 6, 23, .6); z-index: 40; display: flex; align-items: center; justify-content: center; }
+.guide-modal { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 16px 48px rgba(0, 0, 0, .5);
+  max-width: 560px; width: calc(100vw - 48px); padding: 16px 18px; position: relative; }
+.guide-modal h3 { margin: 0 0 8px; font-size: 15px; color: #fff; text-transform: capitalize; }
+.guide-modal p { font-size: 12.5px; line-height: 1.55; margin: 0 0 8px; color: var(--text); }
+.guide-modal-note { color: var(--muted); font-style: italic; }
+.guide-modal-close { position: absolute; top: 6px; right: 10px; background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+.guide-modal-close:hover { color: #fff; }
+
+@media (max-width: 640px) {
+  .guide { padding: 0 10px 48px; }
+  .guide-index { gap: 4px; }
+  .guide-index button { font-size: 10px; padding: 3px 8px; }
+}
