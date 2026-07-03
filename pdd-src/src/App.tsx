@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useRef } from 'react';
+import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { graph, orphanRules } from './model';
 import PddGraph, { type FocusTarget } from './PddGraph';
 import DetailPanel from './DetailPanel';
@@ -14,15 +14,56 @@ const ALL_LABELS = [...new Set(graph.nodes.map((n) => n.label))].sort();
 // (the Home component) rather than a graph view, so there is never a blank no-tab-selected state.
 const README_ID = 'readme';
 
+// Deep links: #<viewId>[/<nodeId>] — the URL names a view and optionally a node in it, so external
+// documents can link straight to a node (e.g. #flow/verb.map). The current view/selection is mirrored
+// back into the hash with replaceState (no history spam; copying the address bar shares the spot).
+// An invalid view or node degrades to the Read-me tab / no selection, never an error.
+function parseHash(h: string): { viewId: string; nodeId: string | null } | null {
+  const raw = h.replace(/^#/, '');
+  if (!raw) return null;
+  const [v, n] = raw.split('/').map((s) => decodeURIComponent(s));
+  const viewOk = v === README_ID || graph.views.some((view) => view.id === v);
+  if (!viewOk) return null;
+  const nodeId = n && graph.nodes.some((node) => node.id === n) ? n : null;
+  return { viewId: v, nodeId };
+}
+
 export default function App() {
-  const [viewId, setViewId] = useState<string>(README_ID);
+  // Lazy initializers read the hash ONCE so a deep-linked view/node is the first render, not a flash
+  // of Read-me. The initial focus rides the same parse; PddGraph defers the fit until layoutstop.
+  const initialRef = useRef(parseHash(typeof window !== 'undefined' ? window.location.hash : ''));
+  const [viewId, setViewId] = useState<string>(initialRef.current?.viewId ?? README_ID);
   const [toggles, setToggles] = useState<Toggles>({ showProvisional: true });
-  const [selected, setSelected] = useState<string | null>(null);
-  const [focus, setFocus] = useState<FocusTarget | null>(null);
+  const [selected, setSelected] = useState<string | null>(initialRef.current?.nodeId ?? null);
+  const [focus, setFocus] = useState<FocusTarget | null>(
+    initialRef.current?.nodeId ? { id: initialRef.current.nodeId, nonce: 1 } : null,
+  );
   const [query, setQuery] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [orphanToast, setOrphanToast] = useState(orphanRules.length > 0);
-  const nonce = useRef(0);
+  const nonce = useRef(1);
+
+  // Mirror view/selection into the hash. replaceState never fires hashchange, so this cannot loop
+  // with the listener below.
+  useEffect(() => {
+    const hash = viewId === README_ID ? '' : `#${viewId}${selected ? '/' + encodeURIComponent(selected) : ''}`;
+    const current = window.location.hash;
+    if (hash === current || (!hash && !current)) return;
+    history.replaceState(null, '', hash || window.location.pathname + window.location.search);
+  }, [viewId, selected]);
+
+  // Manual hash edits / links clicked inside the page: apply them as a view+select+center jump.
+  useEffect(() => {
+    const onHash = () => {
+      const p = parseHash(window.location.hash);
+      if (!p) { setSelected(null); setViewId(README_ID); return; }
+      setViewId(p.viewId);
+      setSelected(p.nodeId);
+      if (p.nodeId) setFocus({ id: p.nodeId, nonce: ++nonce.current });
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
 
   const view = useMemo(
     () => (viewId === README_ID ? null : graph.views.find((v) => v.id === viewId) ?? null),
