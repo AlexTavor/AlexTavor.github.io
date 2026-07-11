@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engineering Discipline — Alex Tavor</title>
+<meta name="description" content="Twenty-four portable, stack-independent software-engineering rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk.">
+<link rel="canonical" href="https://alextavor.github.io/engineering-discipline/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Engineering Discipline">
+<meta property="og:description" content="Twenty-four portable, stack-independent software-engineering rules, made explicit. A Claude Code plugin.">
+<meta property="og:url" content="https://alextavor.github.io/engineering-discipline/">
+<meta property="og:site_name" content="Alex Tavor">
+<link rel="stylesheet" href="/style.css">
+<style>
+  html { scroll-behavior: smooth; }
+  .ed-doc { --mono: "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace; --neg: #a2402f; }
+  @media (prefers-color-scheme: dark) { .ed-doc { --neg: #dd9a8c; } }
+
+  .ed-wrap { max-width: 62rem; margin: 0 auto; padding: 1.4rem 1.25rem 5rem; }
+  .ed-masthead { max-width: 44rem; margin: 0 0 1.5rem; }
+  .ed-masthead h1 { margin: .2rem 0 .5rem; }
+  .ed-masthead .lede { color: var(--muted); font-size: 1.04rem; margin: 0 0 .9rem; line-height: 1.55; }
+  .ed-masthead .meta { font-family: var(--mono); font-size: .78rem; color: var(--muted); letter-spacing: .03em; margin: 0; }
+  .ed-masthead .meta b { color: var(--link); font-weight: 600; }
+
+  .ed-layout { display: grid; grid-template-columns: minmax(0, 13.5rem) minmax(0, 1fr); gap: 3rem; align-items: start; }
+
+  .toc { position: sticky; top: 1.25rem; align-self: start; max-height: calc(100vh - 2.5rem); overflow: auto; font-family: var(--mono); font-size: .8rem; }
+  .toc summary { display: none; }
+  .toc-group { margin-bottom: 1.2rem; }
+  .toc-theme { display: block; text-transform: uppercase; letter-spacing: .09em; font-size: .66rem; color: var(--muted); margin-bottom: .45rem; text-decoration: none; }
+  .toc-theme:hover { color: var(--fg); }
+  .toc ul { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--rule); }
+  .toc li a { display: block; padding: .2rem 0 .2rem .8rem; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; margin-left: -1px; line-height: 1.3; }
+  .toc li a:hover { color: var(--link); }
+  .toc li a.active { color: var(--link); border-left-color: var(--link); font-weight: 600; }
+
+  .ed-main { min-width: 0; max-width: 42rem; }
+  .theme { margin-top: 3.25rem; }
+  .theme:first-child { margin-top: 0; }
+  .theme-header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-top: 2px solid var(--fg); padding-top: .85rem; margin-bottom: 1.5rem; scroll-margin-top: 1rem; }
+  .theme-header h2 { font-size: 1.28rem; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+  .theme-tagline { color: var(--muted); font-style: italic; margin: .3rem 0 0; font-size: 1rem; }
+  .theme-count { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+
+  .skill { margin: 2.5rem 0; scroll-margin-top: 1rem; }
+  .skill-name { font-family: var(--mono); font-size: 1.08rem; font-weight: 600; letter-spacing: -.01em; margin: 0 0 .6rem; }
+  .skill-name::before { content: "\203a\00a0"; color: var(--link); }
+  .skill-desc { color: var(--muted); font-size: 1rem; border-left: 2px solid var(--link); background: var(--code-bg); padding: .7rem .95rem; margin: 0 0 1.15rem; border-radius: 0 4px 4px 0; line-height: 1.55; }
+
+  .skill-body h4 { font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; color: var(--link); margin: 1.7rem 0 .5rem; font-weight: 700; }
+  .skill-body h4.neg { color: var(--neg); }
+  .skill-body h5 { font-family: var(--mono); font-size: .9rem; margin: 1.2rem 0 .35rem; font-weight: 700; }
+  .skill-body h5.neg { color: var(--neg); }
+  .skill-body p { margin: .7rem 0; }
+  .skill-body ul, .skill-body ol { margin: .55rem 0; padding-left: 1.3rem; }
+  .skill-body li { margin: .3rem 0; }
+  .skill-body li::marker { color: var(--muted); }
+  .skill-body strong { font-weight: 700; }
+  .skill-body em { font-style: italic; }
+  .twrap { overflow-x: auto; margin: 1rem 0; }
+  .skill-body table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  .skill-body th, .skill-body td { border: 1px solid var(--rule); padding: .45rem .65rem; text-align: left; vertical-align: top; }
+  .skill-body th { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--code-bg); font-weight: 600; }
+  .skill-body pre code { font-size: .82rem; }
+
+  .ed-loading, .ed-error { color: var(--muted); font-style: italic; }
+  .ed-error { color: var(--neg); }
+
+  @media (max-width: 52rem) {
+    .ed-layout { grid-template-columns: 1fr; gap: 1rem; }
+    .toc { position: static; max-height: none; border: 1px solid var(--rule); border-radius: 6px; padding: .9rem 1.15rem; background: var(--code-bg); }
+    .toc summary { display: block; cursor: pointer; text-transform: uppercase; letter-spacing: .09em; font-size: .7rem; color: var(--link); }
+    .toc[open] summary { margin-bottom: .9rem; }
+    .ed-main { max-width: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body class="ed-doc">
+<nav class="site-nav"><a href="/">← Alex Tavor</a></nav>
+<main class="ed-wrap">
+
+  <header class="ed-masthead">
+    <h1>Engineering Discipline</h1>
+    <p class="lede">Twenty-four portable, stack-independent rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk. Each is a judgment rule you reach for at the moment it applies.</p>
+    <p class="meta"><b>24 skills</b> · 6 themes · a Claude Code plugin, rendered from its source files</p>
+  </header>
+
+  <div class="ed-layout">
+    <details class="toc" open>
+      <summary>Contents</summary>
+      <div id="toc"></div>
+    </details>
+    <main class="ed-main" id="main">
+      <p class="ed-loading">Loading skills…</p>
+      <noscript>This page renders the skill files with JavaScript. The raw files live in <code>skills/</code>.</noscript>
+    </main>
+  </div>
+
+</main>
+
+<script type="module">
+import { marked } from './marked.esm.js';
+marked.setOptions({ gfm: true, breaks: false });
+
+const THEMES = [
+  { id: 'test-adequacy', name: 'Test adequacy', tagline: 'Does the test actually catch a bug?',
+    skills: ['assert-by-shape','boundary-tests','no-op-paths','mutation-grading','properties','keep-properties-honest'] },
+  { id: 'code-structure', name: 'Code structure', tagline: 'One thing, once, and readable.',
+    skills: ['cohesion-review','decompose-by-attention','early-out-over-nested-if','name-and-bundle'] },
+  { id: 'failure-change-safety', name: 'Failure & change safety', tagline: "Don't ship a silent break.",
+    skills: ['silent-failure-census','cover-the-mirror','characterize-before-change','reproducibility-baseline','fix-what-you-find'] },
+  { id: 'reading-unfamiliar-code', name: 'Reading unfamiliar code', tagline: 'The name is a lead, not a fact.',
+    skills: ['read-the-system','footgun-register'] },
+  { id: 'spec-design-hygiene', name: 'Spec & design hygiene', tagline: 'Get it right before the code exists.',
+    skills: ['design-completeness','one-meaning-per-term','trace-requirements-to-tests','design-assumptions-register'] },
+  { id: 'delivery-derisk', name: 'Delivery & de-risk', tagline: 'Commit deliberately.',
+    skills: ['pr-sizing','decision-gate','derisk-gate'] },
+];
+
+function parseFront(text) {
+  const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!m) return { desc: '', body: text };
+  const fm = m[1];
+  let body = m[2];
+  const desc = (fm.match(/^description:\s*(.*)$/m) || [])[1] || '';
+  body = body.replace(/^\s+/, '').replace(/^#\s+[^\n]*\n?/, '');
+  return { desc, body };
+}
+
+function renderBody(body) {
+  let html = marked.parse(body);
+  html = html.replace(/href="\.\.\/([a-z0-9-]+)\/SKILL\.md"/g, 'href="#$1"');
+  html = html.replace(/<h2>(Anti-pattern|When NOT|When not)/g, '<h2 class="neg">$1');
+  html = html.replace(/<h3>(Anti-pattern|When NOT|When not)/g, '<h3 class="neg">$1');
+  html = html.replace(/<h3(\b[^>]*)>/g, '<h5$1>').replace(/<\/h3>/g, '</h5>');
+  html = html.replace(/<h2(\b[^>]*)>/g, '<h4$1>').replace(/<\/h2>/g, '</h4>');
+  html = html.replace(/<table>/g, '<div class="twrap"><table>').replace(/<\/table>/g, '</table></div>');
+  return html;
+}
+
+async function loadSkill(slug) {
+  const res = await fetch(`skills/${slug}.md`);
+  if (!res.ok) throw new Error(`${slug} (${res.status})`);
+  return parseFront(await res.text());
+}
+
+(async function () {
+  try {
+    const data = {};
+    await Promise.all(THEMES.flatMap(t => t.skills).map(async s => { data[s] = await loadSkill(s); }));
+
+    document.getElementById('toc').innerHTML = THEMES.map(t =>
+      `<div class="toc-group"><a class="toc-theme" href="#theme-${t.id}">${t.name}</a>` +
+      `<ul>${t.skills.map(s => `<li><a href="#${s}">${s}</a></li>`).join('')}</ul></div>`
+    ).join('');
+
+    document.getElementById('main').innerHTML = THEMES.map(t =>
+      `<section class="theme" id="theme-${t.id}">` +
+        `<header class="theme-header"><div><h2>${t.name}</h2>` +
+        `<p class="theme-tagline">${t.tagline}</p></div>` +
+        `<span class="theme-count">${t.skills.length} skills</span></header>` +
+        t.skills.map(s => {
+          const sk = data[s];
+          return `<section class="skill" id="${s}">` +
+            `<h3 class="skill-name">${s}</h3>` +
+            `<p class="skill-desc">${marked.parseInline(sk.desc)}</p>` +
+            `<div class="skill-body">${renderBody(sk.body)}</div></section>`;
+        }).join('') +
+      `</section>`
+    ).join('');
+
+    const links = {};
+    document.querySelectorAll('#toc li a').forEach(a => { links[a.getAttribute('href').slice(1)] = a; });
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const a = links[e.target.id];
+          if (!a) return;
+          document.querySelectorAll('#toc li a').forEach(l => l.classList.remove('active'));
+          a.classList.add('active');
+        });
+      }, { rootMargin: '-8% 0px -82% 0px', threshold: 0 });
+      document.querySelectorAll('section.skill').forEach(s => io.observe(s));
+    }
+  } catch (err) {
+    document.getElementById('main').innerHTML =
+      `<p class="ed-error">Could not load the skill files (${err.message}). If you are viewing locally, serve the folder over http rather than opening the file directly.</p>`;
+  }
+})();
+</script>
+</body>
+</html>
