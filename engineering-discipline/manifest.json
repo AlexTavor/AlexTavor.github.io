@@ -1,0 +1,67 @@
+[
+  {
+    "id": "test-adequacy",
+    "name": "Test adequacy",
+    "tagline": "Does the test actually catch a bug?",
+    "skills": [
+      "assert-by-shape",
+      "boundary-tests",
+      "no-op-paths",
+      "mutation-testing",
+      "property-based-testing",
+      "keep-properties-honest"
+    ]
+  },
+  {
+    "id": "code-structure",
+    "name": "Code structure",
+    "tagline": "One thing, once, and readable.",
+    "skills": [
+      "cohesion-review",
+      "decompose-by-attention",
+      "guard-clauses",
+      "name-and-bundle"
+    ]
+  },
+  {
+    "id": "failure-change-safety",
+    "name": "Failure & change safety",
+    "tagline": "Don't ship a silent break.",
+    "skills": [
+      "silent-failure-census",
+      "characterize-before-change",
+      "reproducibility-baseline",
+      "fix-what-you-find"
+    ]
+  },
+  {
+    "id": "reading-unfamiliar-code",
+    "name": "Reading unfamiliar code",
+    "tagline": "The name is a lead, not a fact.",
+    "skills": [
+      "read-the-system",
+      "footgun-register"
+    ]
+  },
+  {
+    "id": "spec-design-hygiene",
+    "name": "Spec & design hygiene",
+    "tagline": "Get it right before the code exists.",
+    "skills": [
+      "design-completeness",
+      "one-meaning-per-term",
+      "requirements-traceability",
+      "design-assumptions-register"
+    ]
+  },
+  {
+    "id": "delivery-derisk",
+    "name": "Delivery & de-risk",
+    "tagline": "Commit deliberately.",
+    "skills": [
+      "pr-sizing",
+      "decision-gate",
+      "derisk-gate"
+    ]
+  }
+]

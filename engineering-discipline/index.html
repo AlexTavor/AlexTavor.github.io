@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Engineering Discipline — Alex Tavor</title>
-<meta name="description" content="Twenty-four portable, stack-independent software-engineering rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk.">
+<meta name="description" content="Twenty-three portable, stack-independent software-engineering rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk.">
 <link rel="canonical" href="https://alextavor.github.io/engineering-discipline/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Engineering Discipline">
-<meta property="og:description" content="Twenty-four portable, stack-independent software-engineering rules, made explicit. A Claude Code plugin.">
+<meta property="og:description" content="Twenty-three portable, stack-independent software-engineering rules, made explicit. A Claude Code plugin.">
 <meta property="og:url" content="https://alextavor.github.io/engineering-discipline/">
 <meta property="og:site_name" content="Alex Tavor">
 <link rel="stylesheet" href="/style.css">
@@ -48,6 +48,7 @@
   .skill-name { font-family: var(--mono); font-size: 1.08rem; font-weight: 600; letter-spacing: -.01em; margin: 0 0 .6rem; }
   .skill-name::before { content: "\203a\00a0"; color: var(--link); }
   .skill-desc { color: var(--muted); font-size: 1rem; border-left: 2px solid var(--link); background: var(--code-bg); padding: .7rem .95rem; margin: 0 0 1.15rem; border-radius: 0 4px 4px 0; line-height: 1.55; }
+  .skill-source { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin: -.55rem 0 1.25rem; letter-spacing: .02em; word-break: break-word; }
 
   .skill-body h4 { font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; color: var(--link); margin: 1.7rem 0 .5rem; font-weight: 700; }
   .skill-body h4.neg { color: var(--neg); }
@@ -84,8 +85,8 @@
 
   <header class="ed-masthead">
     <h1>Engineering Discipline</h1>
-    <p class="lede">Twenty-four portable, stack-independent rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk. Each is a judgment rule you reach for at the moment it applies.</p>
-    <p class="meta"><b>24 skills</b> · 6 themes · a Claude Code plugin, rendered from its source files</p>
+    <p class="lede">Twenty-three portable, stack-independent rules a careful engineer applies by reflex, made explicit: test adequacy, code structure, failure honesty, reading unfamiliar code, spec hygiene, and delivery de-risk. Each is a judgment rule you reach for at the moment it applies.</p>
+    <p class="meta"><b>23 skills</b> · 6 themes · a Claude Code plugin, rendered from its source files. Each skill cites the commit it was earned in.</p>
   </header>
 
   <div class="ed-layout">
@@ -105,20 +106,7 @@
 import { marked } from './marked.esm.js';
 marked.setOptions({ gfm: true, breaks: false });
 
-const THEMES = [
-  { id: 'test-adequacy', name: 'Test adequacy', tagline: 'Does the test actually catch a bug?',
-    skills: ['assert-by-shape','boundary-tests','no-op-paths','mutation-grading','properties','keep-properties-honest'] },
-  { id: 'code-structure', name: 'Code structure', tagline: 'One thing, once, and readable.',
-    skills: ['cohesion-review','decompose-by-attention','early-out-over-nested-if','name-and-bundle'] },
-  { id: 'failure-change-safety', name: 'Failure & change safety', tagline: "Don't ship a silent break.",
-    skills: ['silent-failure-census','cover-the-mirror','characterize-before-change','reproducibility-baseline','fix-what-you-find'] },
-  { id: 'reading-unfamiliar-code', name: 'Reading unfamiliar code', tagline: 'The name is a lead, not a fact.',
-    skills: ['read-the-system','footgun-register'] },
-  { id: 'spec-design-hygiene', name: 'Spec & design hygiene', tagline: 'Get it right before the code exists.',
-    skills: ['design-completeness','one-meaning-per-term','trace-requirements-to-tests','design-assumptions-register'] },
-  { id: 'delivery-derisk', name: 'Delivery & de-risk', tagline: 'Commit deliberately.',
-    skills: ['pr-sizing','decision-gate','derisk-gate'] },
-];
+const THEMES = await (await fetch('manifest.json')).json();
 
 function parseFront(text) {
   const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -126,8 +114,9 @@ function parseFront(text) {
   const fm = m[1];
   let body = m[2];
   const desc = (fm.match(/^description:\s*(.*)$/m) || [])[1] || '';
+  const source = ((fm.match(/^source:\s*(.*)$/m) || [])[1] || '').replace(/^"(.*)"$/, '$1');
   body = body.replace(/^\s+/, '').replace(/^#\s+[^\n]*\n?/, '');
-  return { desc, body };
+  return { desc, source, body };
 }
 
 function renderBody(body) {
@@ -167,6 +156,7 @@ async function loadSkill(slug) {
           return `<section class="skill" id="${s}">` +
             `<h3 class="skill-name">${s}</h3>` +
             `<p class="skill-desc">${marked.parseInline(sk.desc)}</p>` +
+            (sk.source ? `<p class="skill-source">${sk.source}</p>` : '') +
             `<div class="skill-body">${renderBody(sk.body)}</div></section>`;
         }).join('') +
       `</section>`
