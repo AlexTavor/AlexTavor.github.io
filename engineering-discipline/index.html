@@ -49,6 +49,7 @@
   .skill-name::before { content: "\203a\00a0"; color: var(--link); }
   .skill-desc { color: var(--muted); font-size: 1rem; border-left: 2px solid var(--link); background: var(--code-bg); padding: .7rem .95rem; margin: 0 0 1.15rem; border-radius: 0 4px 4px 0; line-height: 1.55; }
   .skill-source { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin: -.55rem 0 1.25rem; letter-spacing: .02em; word-break: break-word; }
+  .skill-source a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
 
   .skill-body h4 { font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; color: var(--link); margin: 1.7rem 0 .5rem; font-weight: 700; }
   .skill-body h4.neg { color: var(--neg); }
@@ -130,6 +131,27 @@ function renderBody(body) {
   return html;
 }
 
+const REPO_URL = {
+  chdr: 'https://github.com/AlexTavor/chdr/commit/',
+  PDD: 'https://github.com/AlexTavor/proof-driven-development/commit/',
+  'cave-public': 'https://github.com/AlexTavor/cave-public/commit/',
+  cave: 'https://github.com/AlexTavor/cave/commit/',
+};
+// Turn "recovered from git: chdr 8f0a17f, 8500a04; PDD f4170cc" into linked commit hashes.
+function linkSource(src) {
+  const m = src.match(/^(.*?git:\s*)(.*)$/);
+  if (!m) return src;
+  const groups = m[2].split(/;\s*/).map(seg => {
+    const parts = seg.trim().split(/\s+/);
+    const repo = parts[0];
+    const base = REPO_URL[repo];
+    const hashes = parts.slice(1).join(' ').split(/,\s*/).filter(Boolean);
+    const linked = hashes.map(h => base ? `<a href="${base}${h}" target="_blank" rel="noopener">${h}</a>` : h).join(', ');
+    return `${repo} ${linked}`;
+  });
+  return m[1] + groups.join('; ');
+}
+
 async function loadSkill(slug) {
   const res = await fetch(`skills/${slug}.md`);
   if (!res.ok) throw new Error(`${slug} (${res.status})`);
@@ -156,7 +178,7 @@ async function loadSkill(slug) {
           return `<section class="skill" id="${s}">` +
             `<h3 class="skill-name">${s}</h3>` +
             `<p class="skill-desc">${marked.parseInline(sk.desc)}</p>` +
-            (sk.source ? `<p class="skill-source">${sk.source}</p>` : '') +
+            (sk.source ? `<p class="skill-source">${linkSource(sk.source)}</p>` : '') +
             `<div class="skill-body">${renderBody(sk.body)}</div></section>`;
         }).join('') +
       `</section>`
